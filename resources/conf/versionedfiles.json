@@ -2,6 +2,7 @@
     "resources/client/css/style.css",
     
     "resources/client/js/utils.js",
+    "resources/shared/js/chessboard.js",
     "resources/client/js/smartdom.js",
     "resources/client/js/index.js"
 ]

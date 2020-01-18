@@ -98,3 +98,8 @@ class NdjsonReader{
         )
     }
 }
+
+function stripsan(san){
+    let strippedsan = san.replace(new RegExp(`[\+#]*`, "g"), "")
+    return strippedsan
+}
