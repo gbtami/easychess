@@ -192,8 +192,9 @@ class SmartDomElement{
 
     html(x){this.e.innerHTML = x; return this}
 
-    allChilds(accOpt, levelOpt){
+    allChilds(accOpt, levelOpt, idLevelOpt){
         let level = levelOpt || 0
+        let idLevel = idLevelOpt || 0
 
         let acc = accOpt || {            
             allChilds: [],
@@ -203,17 +204,17 @@ class SmartDomElement{
         }
 
         if(!acc.childsLevel[level]) acc.childsLevel[level] = []
-        if(!acc.idChildsLevel[level]) acc.idChildsLevel[level] = []
+        if(!acc.idChildsLevel[idLevel]) acc.idChildsLevel[idLevel] = []
         
         acc.allChilds.push(this)
         acc.childsLevel[level].push(this)
         if(this.id){
             acc.allIdChilds.push(this)
-            acc.idChildsLevel[level].push(this)
+            acc.idChildsLevel[idLevel].push(this)
         }
 
         for(let child of this.childs){
-            acc = child.allChilds(acc, level + 1)
+            acc = child.allChilds(acc, level + 1, idLevel + (this.id ? 1 : 0))
         }
 
         return acc

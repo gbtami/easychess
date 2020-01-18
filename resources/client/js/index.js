@@ -8,4 +8,6 @@ for(let entry of Object.entries(allNodes)){
     console.log(entry[1].path(ALLOW_NON_ID))
 }
 
+console.log(app.allChilds())
+
 document.getElementById('root').appendChild(app.e)
