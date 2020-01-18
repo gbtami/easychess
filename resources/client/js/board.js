@@ -4,6 +4,8 @@ class Board_ extends SmartDomElement{
 
         this.squaresize = this.props.squaresize || 60        
 
+        this.squareopacity = this.props.squareopacity || 0.3
+
         this.game = Game({variant: this.props.variant || DEFAULT_VARIANT}).setfromfen()        
 
         this.canvasnames = [
@@ -77,7 +79,11 @@ class Board_ extends SmartDomElement{
     }
 
     drawSquares(){        
-        let squarecanvas = this.getCanvasByName("square")
+        let backgroundcanvas = this.getCanvasByName("background")
+
+        backgroundcanvas.loadBackgroundImage('resources/client/img/backgrounds/wood.jpg')
+
+        let squarecanvas = this.getCanvasByName("square").op(this.squareopacity)
         
         for(let sq of ALL_SQUARES){
             squarecanvas.fillStyle(this.squarelight(sq) ? "#eed" : "#aab")

@@ -1296,14 +1296,31 @@ class Canvas_ extends SmartDomElement{
         dt = dt.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=' + name + "." + kind)
         return dt
     }
+
+    bimgLoaded(){
+        let mulx = Math.floor(this.width / this.bimg.naturalWidth) + 1
+        let muly = Math.floor(this.height / this.bimg.naturalHeight) + 1                
+        for(let x = 0; x < mulx; x++) for(let y = 0; y < muly; y++){
+            this.ctx.drawImage(this.bimg.e, x * this.bimg.naturalWidth, y * this.bimg.naturalHeight)
+        }
+    }
+
+    loadBackgroundImage(url){
+        this.bimg = Img()
+        this.bimg.e.addEventListener("load", this.bimgLoaded.bind(this))
+        this.bimg.src = url
+    }
+
 }
 function Canvas(props){return new Canvas_(props)}
 
 class Img_ extends SmartDomElement{
-    constructor(props){
-        super("img", props)
+    constructor(propsOpt){
+        super("img", propsOpt)
 
-        this.width(props.width || 100).height(props.height || 100)
+        this.props = propsOpt || {}
+
+        this.width(this.props.width || 100).height(this.props.height || 100)
     }
 
     width(width){
