@@ -1,0 +1,8 @@
+{
+    "dev": [
+        "resources/client/js/smartdom.js"
+    ],
+    "prod": [
+        "resources/client/js/smartdom.js"
+    ]
+}
