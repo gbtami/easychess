@@ -99,6 +99,10 @@ class NdjsonReader{
     }
 }
 
+function strippedfen(fen){
+    return fen.split(" ").slice(0, 4).join(" ")
+}
+
 function stripsan(san){
     let strippedsan = san.replace(new RegExp(`[\+#]*`, "g"), "")
     return strippedsan
