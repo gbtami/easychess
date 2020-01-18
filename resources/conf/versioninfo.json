@@ -1,4 +1,22 @@
 {
+  "resources/client/css/style.css": {
+    "dev": 2794453477,
+    "mode": 33206,
+    "nlink": 1,
+    "uid": 0,
+    "gid": 0,
+    "rdev": 0,
+    "ino": 4503599630071096,
+    "size": 365,
+    "atimeMs": 1579331865954.3513,
+    "mtimeMs": 1578310190690.0767,
+    "ctimeMs": 1578310190690.0767,
+    "birthtimeMs": 1579331865954.3513,
+    "atime": "2020-01-18T07:17:45.954Z",
+    "mtime": "2020-01-06T11:29:50.690Z",
+    "ctime": "2020-01-06T11:29:50.690Z",
+    "birthtime": "2020-01-18T07:17:45.954Z"
+  },
   "resources/client/js/utils.js": {
     "dev": 2794453477,
     "mode": 33206,
