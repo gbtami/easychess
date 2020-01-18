@@ -3,7 +3,10 @@ class App extends SmartDomElement{
         super("div", props)
 
         this.am(
-            this.board = Board()
+            this.board = Board(),
+            this.controlPanel = div().mar(3).marl(0).w(this.board.boardsize() - 6).pad(3).bc("#cca").a(
+                Button("Flip", this.board.doflip.bind(this.board))
+            )
         )
     }
 }

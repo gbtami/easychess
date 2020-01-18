@@ -29,7 +29,7 @@ class Board_ extends SmartDomElement{
         )
 
         this.a(
-            div().por().a(
+            div().w(this.boardsize()).h(this.boardsize()).por().a(
                 this.canvases
             )            
         )
@@ -38,7 +38,7 @@ class Board_ extends SmartDomElement{
     }
 
     positionchanged(){
-
+        this.draw()
     }
 
     doflip(){
