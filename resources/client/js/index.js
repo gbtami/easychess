@@ -1,13 +1,13 @@
-let app = div({id: "app"}).am(
-    div().w(200).h(200).bc("#afa").a(
-        div({id: "content"}).html("content")
-    )
-)
+class App extends SmartDomElement{
+    constructor(props){
+        super("div", props)
 
-for(let entry of Object.entries(allNodes)){
-    console.log(entry[1].path(ALLOW_NON_ID))
+        this.am(
+            EditableList({id: "templates", width: 800, isContainer: true})
+        )
+    }
 }
 
-console.log(app.allChilds())
+let app = new App({id: "app"})
 
 document.getElementById('root').appendChild(app.e)

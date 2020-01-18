@@ -1,4 +1,5 @@
 const ALLOW_NON_ID = true
+const EXCEPT_THIS = true
 
 var allNodes = {}
 
@@ -127,7 +128,11 @@ class SmartDomElement{
     ae(kinds, callback){
         for(let kind of kinds.split(" ")) this.e.addEventListener(kind, callback); return this
     }
-    x(){this.e.innerHTML = ""; return this}
+    x(){
+        this.e.innerHTML = ""
+        this.childs = []
+        return this
+    }
     w(x){return this.addStyle("width", `${x}px`)}
     miw(x){return this.addStyle("minWidth", `${x}px`)}
     maw(x){return this.addStyle("maxWidth", `${x}px`)}
@@ -192,9 +197,10 @@ class SmartDomElement{
 
     html(x){this.e.innerHTML = x; return this}
 
-    allChilds(accOpt, levelOpt, idLevelOpt){
+    allChilds(accOpt, levelOpt, idLevelOpt, exceptThisOpt){
         let level = levelOpt || 0
         let idLevel = idLevelOpt || 0
+        let exceptThis = exceptThisOpt || false
 
         let acc = accOpt || {            
             allChilds: [],
@@ -205,12 +211,14 @@ class SmartDomElement{
 
         if(!acc.childsLevel[level]) acc.childsLevel[level] = []
         if(!acc.idChildsLevel[idLevel]) acc.idChildsLevel[idLevel] = []
-        
-        acc.allChilds.push(this)
-        acc.childsLevel[level].push(this)
-        if(this.id){
-            acc.allIdChilds.push(this)
-            acc.idChildsLevel[idLevel].push(this)
+
+        if( ! ( (level == 0) && (exceptThis) ) ){
+            acc.allChilds.push(this)
+            acc.childsLevel[level].push(this)
+            if(this.id){
+                acc.allIdChilds.push(this)
+                acc.idChildsLevel[idLevel].push(this)
+            }
         }
 
         for(let child of this.childs){
@@ -236,8 +244,8 @@ class SmartDomElement{
         return this
     }
 
-    mountSmart(){
-        let acc = this.allChilds()
+    mountSmart(exceptThisOpt){
+        let acc = this.allChilds(null, null, null, exceptThisOpt)
         for(let child of acc.allChilds){
             child.mountedSmart()
         }
@@ -246,6 +254,12 @@ class SmartDomElement{
     am(...childs){
         this.a(...childs)
         this.mountSmart()
+        return this
+    }
+
+    ame(...childs){
+        this.a(...childs)
+        this.mountSmart(EXCEPT_THIS)
         return this
     }
 }
@@ -528,7 +542,7 @@ class Combo_ extends SmartDomElement{
 
     init(){
         this.ae("change", this.change.bind(this))
-        this.a(
+        this.ame(
             this.props.options.map(option=>(
                 ComboOption({value: option.value, display: option.display, selected: option.value == this.props.selected})
             ))
@@ -567,7 +581,7 @@ class OptionElement_ extends SmartDomElement{
                 ]
             :
                 [{value: "scalar", display: "Scalar"}]            
-            this.editDiv.x().a(
+            this.editDiv.x().ame(
                 div().dfc().ww(ip.optionEditDivWidth).hh(ip.height)
                     .bc(ip.optionEditDivBackgroundColor)
                     .pad(ip.optionEditDivPadding)
@@ -809,7 +823,7 @@ class OptionElement_ extends SmartDomElement{
         this.elementDiv = div().ww(ip.elementDivWidth).dfc().por().mar(2).pad(2)
             .fs(ip.optionElementDivFontSize)
 
-        this.x().a(
+        this.x().ame(
             div().dfc().a(
                 this.dragBox,
                 this.editOptionButton,                
@@ -1097,7 +1111,7 @@ class EditableList_ extends SmartDomElement{
 
         if(!this.state.selected && this.state.options.length) this.state.selected = this.state.options[0]
         
-        this.optionsDiv.x().a(this.state.options.map(option=>
+        this.optionsDiv.x().ame(this.state.options.map(option=>
             OptionElement({option: option})
         ))        
 
