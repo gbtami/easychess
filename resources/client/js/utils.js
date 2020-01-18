@@ -3,8 +3,6 @@ function IS_DEV(){
     return !!document.location.host.match(/localhost/)
 }
 
-console.log(`dev ${IS_DEV()}`)
-
 Array.prototype.itoj = function(i, j){    
     while(i != j){
         const n = j > i ? i + 1 : i - 1;

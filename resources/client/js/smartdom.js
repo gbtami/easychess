@@ -1,3 +1,5 @@
+const ALLOW_NON_ID = true
+
 var allNodes = {}
 
 class SmartDomEvent{
@@ -14,10 +16,15 @@ class SmartDomEvent{
 
 class SmartDomElement{
     constructor(tagName, propsOpt){
-        this.e = document.createElement(tagName)
+        this.tagName = tagName
+
+        this.e = document.createElement(this.tagName)
+
         this.props = propsOpt || {}
 
         this.id = this.props.id || null
+
+        this.pathId = UID()
 
         this.childs = []
         this.parent = null
@@ -39,8 +46,9 @@ class SmartDomElement{
     }
 
     mountedSmart(){
+        this.pathId = `child${this.index}_${this.tagName}`
         this.state = this.getStoredState()                        
-        allNodes[this.path()] = this
+        if(IS_DEV()) allNodes[this.path(ALLOW_NON_ID)] = this
         if(this.init) this.init()
     }
 
@@ -64,32 +72,37 @@ class SmartDomElement{
         }
     }
 
-    idParent(){
-        if(this.props.idParent) return this.props.idParent
+    idParent(allowNonId){
+        if((!allowNonId) && this.props.idParent) return this.props.idParent
+
         let current = this
+
         do{            
             current = current.parent                                    
-            if(current) if(current.id) return current
+            if(current) if(current.id || allowNonId) return current
         }while(current)
+
         return null
     }
 
-    idParentChain(){
+    idParentChain(allowNonId){
         let chain = []
         let current = this
+
         while(current){                             
             chain.unshift(current)
-            current = current.idParent()
+            current = current.idParent(allowNonId)
         }
+
         return chain
     }
 
-    pathList(){
-        return this.idParentChain().map(ip=>ip.id ? ip.id : "*")
+    pathList(allowNonId){
+        return this.idParentChain(allowNonId).map(ip=>ip.id ? ip.id : ip.pathId)
     }
 
-    path(){
-        return this.pathList().join("/")
+    path(allowNonId){
+        return this.pathList(allowNonId).join("/")
     }
 
     handleEvent(sev){
@@ -179,18 +192,59 @@ class SmartDomElement{
 
     html(x){this.e.innerHTML = x; return this}
 
+    allChilds(accOpt, levelOpt){
+        let level = levelOpt || 0
+
+        let acc = accOpt || {            
+            allChilds: [],
+            childsLevel: {},
+            allIdChilds: [],
+            idChildsLevel: {},
+        }
+
+        if(!acc.childsLevel[level]) acc.childsLevel[level] = []
+        if(!acc.idChildsLevel[level]) acc.idChildsLevel[level] = []
+        
+        acc.allChilds.push(this)
+        acc.childsLevel[level].push(this)
+        if(this.id){
+            acc.allIdChilds.push(this)
+            acc.idChildsLevel[level].push(this)
+        }
+
+        for(let child of this.childs){
+            acc = child.allChilds(acc, level + 1)
+        }
+
+        return acc
+    }
+
     a(...childs){
         let childList = []
         for(let child of childs){
             if(child instanceof Array) childList = childList.concat(child)
             else childList.push(child)
         }
+        let index = 0
         for(let child of childList){
             child.parent = this
+            child.index = index++
             this.childs.push(child)
             this.e.appendChild(child.e)
-            child.mountedSmart()
         }        
+        return this
+    }
+
+    mountSmart(){
+        let acc = this.allChilds()
+        for(let child of acc.allChilds){
+            child.mountedSmart()
+        }
+    }
+
+    am(...childs){
+        this.a(...childs)
+        this.mountSmart()
         return this
     }
 }

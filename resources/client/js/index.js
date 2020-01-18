@@ -1,9 +1,11 @@
-let app = div({id: "app"}).a(
-    div({id:"greendiv"}).w(200).h(200).bc("#afa").a(
+let app = div({id: "app"}).am(
+    div().w(200).h(200).bc("#afa").a(
         div({id: "content"}).html("content")
     )
 )
 
-document.getElementById('root').appendChild(app.e)
+for(let entry of Object.entries(allNodes)){
+    console.log(entry[1].path(ALLOW_NON_ID))
+}
 
-console.log(allNodes)
+document.getElementById('root').appendChild(app.e)
