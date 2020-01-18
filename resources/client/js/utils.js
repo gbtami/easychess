@@ -103,3 +103,9 @@ function stripsan(san){
     let strippedsan = san.replace(new RegExp(`[\+#]*`, "g"), "")
     return strippedsan
 }
+
+function getclassforpiece(p, style){
+    let kind = p.kind
+    if(p.color == WHITE) kind = "w" + kind
+    return ( style || "alpha" ) + "piece" + kind
+}

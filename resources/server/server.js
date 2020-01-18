@@ -11,6 +11,11 @@ function IS_DEV(){
     return !!process.env.EASYCHESS_DEV
 }
 
+function getVer(obj, field){
+    if(!obj[field]) return ""
+    return `?ver=${obj[field].mtime}`
+}
+
 const __rootdirname = path.join(__dirname, '../..')
 
 let clientScripts = readJson('resources/conf/clientscripts.json')[IS_DEV() ? "dev" : "prod"]
@@ -18,8 +23,11 @@ let clientStyleSheets = readJson('resources/conf/clientstylesheets.json')[IS_DEV
 
 let versionInfo = readJson('resources/conf/versioninfo.json')
 
-let loadScripts = clientScripts.map(script=>`<script src="${script}?ver=${versionInfo[script].mtime}"></script>`).join("\n")
-let loadStyleSheets = clientStyleSheets.map(stylesheet=>`<link href="${stylesheet}?ver=${versionInfo[stylesheet].mtime}" rel="stylesheet" />`).join("\n")
+let loadScripts = clientScripts.map(script=>
+    `<script src="${script}${getVer(versionInfo, script)}"></script>`).join("\n")
+    
+let loadStyleSheets = clientStyleSheets.map(stylesheet=>
+    `<link href="${stylesheet}${getVer(versionInfo, stylesheet)}" rel="stylesheet" />`).join("\n")
 
 app.use(express.static(__rootdirname))
 
