@@ -25,7 +25,7 @@ let versionInfo = readJson('resources/conf/versioninfo.json')
 
 let loadScripts = clientScripts.map(script=>
     `<script src="${script}${getVer(versionInfo, script)}"></script>`).join("\n")
-    
+
 let loadStyleSheets = clientStyleSheets.map(stylesheet=>
     `<link href="${stylesheet}${getVer(versionInfo, stylesheet)}" rel="stylesheet" />`).join("\n")
 
@@ -43,6 +43,8 @@ app.get('/', (req, res) => res.send(`
 
         <meta charset="utf-8">
         <title>Easy Chess</title>    
+
+        <link rel="icon" href="/resources/client/favicon.ico" />
 
         <script>
         const PROPS = ${JSON.stringify(PROPS, null, 2)}
