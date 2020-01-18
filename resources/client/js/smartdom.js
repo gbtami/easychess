@@ -1,3 +1,5 @@
+var allNodes = {}
+
 class SmartDomEvent{
     constructor(ev, e){
         this.ev = ev
@@ -38,6 +40,7 @@ class SmartDomElement{
 
     mountedSmart(){
         this.state = this.getStoredState()                        
+        allNodes[this.path()] = this
         if(this.init) this.init()
     }
 

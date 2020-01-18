@@ -8,7 +8,7 @@ const app = express()
 const PORT = process.env.PORT || 3000
 
 function IS_DEV(){
-    return process.env.EASYCHESS_DEV
+    return !!process.env.EASYCHESS_DEV
 }
 
 const __rootdirname = path.join(__dirname, '../..')
@@ -20,6 +20,10 @@ let loadScripts = clientScripts.map(script=>`<script src='${script}?ver=${versio
 
 app.use(express.static(__rootdirname))
 
+const PROPS = {
+    IS_DEV: IS_DEV()
+}
+
 app.get('/', (req, res) => res.send(`
 <!DOCTYPE html>
 <html lang="en">
@@ -28,6 +32,10 @@ app.get('/', (req, res) => res.send(`
 
         <meta charset="utf-8">
         <title>Easy Chess</title>    
+
+        <script>
+        const PROPS = ${JSON.stringify(PROPS, null, 2)}
+        </script>
 
         ${loadScripts}
 
