@@ -86,8 +86,52 @@ class Board_ extends SmartDomElement{
         }        
     }
 
+    piecesize(){return this.squaresize * 0.85}
+
+    drawPiece(canvas, coords, p){                
+        const klasssel = "." + getclassforpiece(p, this.piecestyle)                                                    
+        let img
+        if(!this.imgcache) this.imgcache = {}
+        if(this.imgcache[klasssel]){
+            img = this.imgcache[klasssel]
+            canvas.ctx.drawImage(img.e, coords.x, coords.y, this.piecesize(), this.piecesize())
+        }else{
+            let style = getStyle(klasssel)            
+            let imgurl = style.match(/url\("(.*?)"/)[1]                
+            let imgurlparts = imgurl.split(",")
+            let svgb64 = imgurlparts[1]
+            let svg = atob(svgb64)
+            let newsvg = svg.replace(/^<svg/, `<svg width="${this.piecesize()}" height="${this.piecesize()}"`)
+            let newsvgb64 = btoa(newsvg)
+            let newimgurl = imgurlparts[0] + "," + newsvgb64            
+            let img = Img({width: this.piecesize(), height: this.piecesize()})                            
+            let fen = this.game.fen()
+            img.e.onload = ()=>{
+                if(this.game.fen() == fen){
+                    canvas.ctx.drawImage(img.e, coords.x, coords.y, this.piecesize(), this.piecesize())
+                }                
+                this.imgcache[klasssel] = img                
+            }
+            img.e.src = newimgurl                                                        
+        }   
+    }
+
+    drawPieces(){                        
+        let piececanvas = this.getCanvasByName("piece")
+        piececanvas.clear()
+        for(let sq of ALL_SQUARES){
+            let p = this.game.board.pieceatsquare(sq)
+            if(!p.isempty()){                
+                let pc = this.piececoords(sq)
+                this.drawPiece(piececanvas, pc, p)
+            }
+        }
+    }
+
     draw(){
         this.drawSquares()
+
+        this.drawPieces()
     }
 }
 function Board(props){return new Board_(props)}

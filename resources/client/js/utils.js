@@ -133,3 +133,16 @@ class Vect_{
     }
 }
 function Vect(x,y){return new Vect_(x,y)}
+
+function getStyle(className) {
+    let cssText = ""
+    for(let si=0;si<document.styleSheets.length;si++){
+        let classes = document.styleSheets[si].rules || document.styleSheets[0].cssRules
+        for (let x = 0; x < classes.length; x++) {                            
+            if (classes[x].selectorText == className) {
+                cssText += classes[x].cssText || classes[x].style.cssText
+            }         
+        }
+    }    
+    return cssText
+}

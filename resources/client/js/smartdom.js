@@ -1298,3 +1298,29 @@ class Canvas_ extends SmartDomElement{
     }
 }
 function Canvas(props){return new Canvas_(props)}
+
+class Img_ extends SmartDomElement{
+    constructor(props){
+        super("img", props)
+
+        this.width(props.width || 100).height(props.height || 100)
+    }
+
+    width(width){
+        this.sa("width", width)
+        return this
+    }
+
+    height(height){
+        this.sa("height", height)
+        return this
+    }
+
+    set src(src){
+        this.e.src = src
+    }
+
+    get naturalWidth(){return this.e.naturalWidth}
+    get naturalHeight(){return this.e.naturalHeight}
+}
+function Img(props){return new Img_(props)}
