@@ -117,11 +117,11 @@ class Vect_{
     }
 
     p(v){
-        return V(this.x + v.x, this.y + v.y)
+        return Vect(this.x + v.x, this.y + v.y)
     }
 
     m(v){
-        return V(this.x - v.x, this.y - v.y)
+        return Vect(this.x - v.x, this.y - v.y)
     }
 
     l(){
@@ -129,7 +129,7 @@ class Vect_{
     }
 
     s(s){
-        return V(s*this.x, s*this.y)
+        return Vect(s*this.x, s*this.y)
     }
 }
 function Vect(x,y){return new Vect_(x,y)}

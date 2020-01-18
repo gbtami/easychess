@@ -111,8 +111,8 @@ class SmartDomElement{
     }
 
     handleEventAgent(ev){                
-        let sev = new SmartDomEvent(ev, this)
-        for(let ip of this.idParentChain().reverse()){                        
+        let sev = new SmartDomEvent(ev, this)        
+        for(let ip of this.idParentChain().reverse()){                                    
             ip.handleEvent(sev)
             if(sev.stopPropagation) return
         }
@@ -1204,6 +1204,10 @@ class Canvas_ extends SmartDomElement{
         for(let i in lines){
             this.ctx.fillText(lines[i], x, y + i * lineheight)
         }
+    }
+
+    clearRect(orig, size){
+        this.ctx.clearRect(orig.x, orig.y, size.x, size.y)
     }
 
     clear(){

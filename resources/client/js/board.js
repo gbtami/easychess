@@ -30,11 +30,79 @@ class Board_ extends SmartDomElement{
 
         this.a(
             div().w(this.boardsize()).h(this.boardsize()).por().a(
-                this.canvases
+                this.canvases,
+                div({ev: "dragstart mousemove mouseup", do: "dragpiece"}).w(this.boardsize()).h(this.boardsize()).poa().drgb()
             )            
         )
 
         this.draw()
+    }
+
+    coordstosq(coords){return this.fasq(Square(Math.floor(coords.x / this.squaresize), Math.floor(coords.y / this.squaresize)))}
+
+    clearPiece(sq){                    
+        this.getCanvasByName("piece").clearRect(this.piececoords(sq), Vect(this.piecesize(), this.piecesize()))        
+    }
+
+    getlms(){
+        return this.game.board.legalmovesforallpieces()
+    }
+
+    makeMove(move){
+        this.game.makemove(move)
+        this.positionchanged()
+    }
+
+    handleEvent(sev){
+        if(sev.do == "dragpiece"){
+            switch(sev.kind){
+                case "dragstart":
+                    sev.ev.preventDefault()                        
+                    let bcr = this.getCanvasByName("dragpiece").e.getBoundingClientRect()
+                    this.piecedragorig = Vect(sev.ev.clientX - bcr.x, sev.ev.clientY - bcr.y)        
+                    this.draggedsq = this.coordstosq(this.piecedragorig)        
+                    this.draggedpiece = this.game.board.pieceatsquare(this.draggedsq)
+                    if(!this.draggedpiece.isempty()){
+                        this.draggedpiececoords = this.piececoords(this.draggedsq)        
+                        this.clearPiece(this.draggedsq)
+                        this.piecedragon = true            
+                    }        
+                    break
+                case "mousemove":
+                    if(this.piecedragon){
+                        let bcr = this.getCanvasByName("dragpiece").e.getBoundingClientRect()
+                        this.piecedragvect = Vect(sev.ev.clientX - bcr.x, sev.ev.clientY - bcr.y)
+                        this.piecedragdiff = this.piecedragvect.m(this.piecedragorig)
+                        this.dragtargetsq = this.coordstosq(this.piecedragvect)            
+                        
+                        let dragpiececanvas = this.getCanvasByName("dragpiece")
+                        dragpiececanvas.clear()
+                        this.drawPiece(dragpiececanvas, this.draggedpiececoords.p(this.piecedragdiff), this.draggedpiece)
+                    }
+                    break
+                case "mouseup":
+                    if(this.piecedragon){
+                        let dragpiececanvas = this.getCanvasByName("dragpiece")
+
+                        dragpiececanvas.clear()            
+
+                        this.drawPiece(dragpiececanvas, this.piececoords(this.fasq(this.dragtargetsq)), this.draggedpiece)
+            
+                        let move = Move(this.draggedsq, this.dragtargetsq)
+                        
+                        let valid = this.getlms().find((testmove)=>testmove.roughlyequalto(move))
+
+                        if(valid){
+                            this.makeMove(valid)
+                        }else{
+                            this.draw()
+                        }
+
+                        this.piecedragon = false
+                    }
+                    break
+            }
+        }
     }
 
     positionchanged(){
@@ -135,9 +203,26 @@ class Board_ extends SmartDomElement{
     }
 
     draw(){
+        this.getCanvasByName("dragpiece").clear()
+
         this.drawSquares()
 
         this.drawPieces()
+    }
+
+    back(){
+        this.game.back()
+        this.positionchanged()
+    }
+
+    forward(){
+        this.game.forward()
+        this.positionchanged()
+    }
+
+    del(){
+        this.game.del()
+        this.positionchanged()
     }
 }
 function Board(props){return new Board_(props)}
