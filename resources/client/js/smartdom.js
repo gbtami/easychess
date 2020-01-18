@@ -911,7 +911,7 @@ class MultipleSelect_ extends SmartDomElement{
 
         this.checkBoxInputs = {}
 
-        this.a(this.state.options.map(option=>
+        this.ame(this.state.options.map(option=>
             div().bc("#bbb").mar(2).dib().a(
                 div().dfc().a(
                     div().mar(2).pad(2).bc("#ddf").html(option.display),
