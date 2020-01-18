@@ -3,7 +3,7 @@ class App extends SmartDomElement{
         super("div", props)
 
         this.am(
-            EditableList({id: "templates", width: 800, isContainer: true})
+            this.board = Board()
         )
     }
 }

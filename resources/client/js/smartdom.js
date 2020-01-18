@@ -1166,3 +1166,135 @@ class EditableList_ extends SmartDomElement{
     }
 }
 function EditableList(props){return new EditableList_(props)}
+
+class Canvas_ extends SmartDomElement{
+    constructor(props){
+        super("canvas", props)
+
+        this.ctx = this.getContext("2d")
+
+        this.setWidth(props.width || 100).setHeight(props.height || 100)
+    }
+
+    // https://stackoverflow.com/questions/2936112/text-wrap-in-a-canvas-element
+    getLines(text, maxWidth) {
+        let words = text.split(" ")
+        let lines = []
+        let currentLine = words[0]
+    
+        for (let i = 1; i < words.length; i++) {
+            var word = words[i]
+            var width = this.ctx.measureText(currentLine + " " + word).width
+            if (width < maxWidth) {
+                currentLine += " " + word
+            } else {
+                lines.push(currentLine)
+                currentLine = word
+            }
+        }
+
+        lines.push(currentLine)
+
+        return lines
+    }
+
+    renderText(text, maxwidth, lineheight, x, y){
+        let lines = this.getLines(text, maxwidth)
+
+        for(let i in lines){
+            this.ctx.fillText(lines[i], x, y + i * lineheight)
+        }
+    }
+
+    clear(){
+        this.ctx.clearRect(0, 0, this.width, this.height)
+    }
+
+    getHeight(){
+        return this.e.height
+    }
+
+    getWidth(){
+        return this.e.width
+    }
+
+    circle(x, y, r){
+        this.ctx.beginPath()
+        this.ctx.arc(x, y, r, 0, 2 * Math.PI, false)
+        this.ctx.stroke()
+    }
+
+    arrow(from, to, argsopt){        
+        let diff = to.m(from)
+        let l = diff.l()
+        let rot = Math.asin((to.y - from.y)/l)        
+        if(to.x < from.x) rot = Math.PI - rot             
+        let args = argsopt || {}        
+        let scalefactor = getelse(args, "scalefactor", 1)
+        let auxscalefactor = getelse(args, "auxscalefactor", 1)
+        let linewidth = getelse(args, "linewidth", 16) * scalefactor * auxscalefactor
+        let halflinewidth = linewidth / 2
+        let pointheight = getelse(args, "pointheight", 40) * scalefactor * auxscalefactor
+        let pointwidth = getelse(args, "pointwidth", 30) * scalefactor * auxscalefactor
+        let halfpointwidth = pointwidth / 2
+        let color = getelse(args, "color", "#ff0")        
+        let opacity = getelse(args, "opacity", 1)        
+        let lineheight = l - pointheight
+        this.ctx.save()
+        this.ctx.globalAlpha = opacity
+        this.ctx.translate(from.x, from.y)
+        this.ctx.rotate(rot)
+        this.ctx.fillStyle = color
+        this.ctx.beginPath()
+        this.ctx.moveTo(0, 0)
+        this.ctx.lineTo(0, halflinewidth)        
+        this.ctx.lineTo(lineheight, halflinewidth)
+        this.ctx.lineTo(lineheight, halflinewidth + halfpointwidth)
+        this.ctx.lineTo(l, 0)
+        this.ctx.lineTo(lineheight, - ( halflinewidth + halfpointwidth ) )
+        this.ctx.lineTo(lineheight, - halflinewidth)
+        this.ctx.lineTo(0, -halflinewidth)        
+        this.ctx.lineTo(0, 0)        
+        this.ctx.closePath()
+        this.ctx.fill()
+        this.ctx.restore()
+    }
+
+    fillStyle(fs){
+        this.ctx.fillStyle = fs
+    }
+
+    fillRect(orig, size){
+        this.ctx.fillRect(orig.x, orig.y, size.x, size.y)
+    }
+
+    setWidth(width){
+        this.width = width
+        this.sa("width", width)
+
+        return this
+    }
+
+    setHeight(height){
+        this.height = height
+        this.sa("height", height)
+
+        return this
+    }
+
+    getContext(context){
+        return this.e.getContext(context)
+    }
+
+    toDataURL(kind){
+        return this.e.toDataURL(kind)
+    }
+
+    downloadHref(name, kind){
+        let dt = this.toDataURL('image/' + kind)
+        dt = dt.replace(/^data:image\/[^;]*/, 'data:application/octet-stream')
+        dt = dt.replace(/^data:application\/octet-stream/, 'data:application/octet-stream;headers=Content-Disposition%3A%20attachment%3B%20filename=' + name + "." + kind)
+        return dt
+    }
+}
+function Canvas(props){return new Canvas_(props)}

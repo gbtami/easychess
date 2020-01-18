@@ -109,3 +109,27 @@ function getclassforpiece(p, style){
     if(p.color == WHITE) kind = "w" + kind
     return ( style || "alpha" ) + "piece" + kind
 }
+
+class Vect_{
+    constructor(x, y){
+        this.x = x
+        this.y = y
+    }
+
+    p(v){
+        return V(this.x + v.x, this.y + v.y)
+    }
+
+    m(v){
+        return V(this.x - v.x, this.y - v.y)
+    }
+
+    l(){
+        return Math.sqrt(this.x*this.x + this.y*this.y)
+    }
+
+    s(s){
+        return V(s*this.x, s*this.y)
+    }
+}
+function Vect(x,y){return new Vect_(x,y)}
