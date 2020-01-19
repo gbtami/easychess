@@ -925,6 +925,10 @@ class Game_{
         return this
     }
 
+    reset(){
+        this.setfromfen()
+    }
+
     setfromnode(node){
         this.currentnodeid = node.id
         this.board.setfromfen(this.getcurrentnode().fen, this.variant)

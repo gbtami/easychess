@@ -40,6 +40,11 @@ class Board_ extends SmartDomElement{
         this.draw()
     }
 
+    reset(){
+        this.game.reset()
+        this.positionchanged()
+    }
+
     coordstosq(coords){return this.fasq(Square(Math.floor(coords.x / this.squaresize), Math.floor(coords.y / this.squaresize)))}
 
     clearPiece(sq){                    
@@ -228,9 +233,14 @@ class Board_ extends SmartDomElement{
         return Vect(this.fasq(sq).file, this.fasq(sq).rank).s(this.squaresize).p(Vect(this.squaresize/2, this.squaresize/2))
     }
 
+    analysiskey(){        
+        return `analysis/${this.game.variant}/${strippedfen(this.game.getcurrentnode().fen)}`
+    }
+
     highlightrichanalysisinfo(richanalysisinfo){        
         let analysisinfo = richanalysisinfo.analysisinfo
         let analysiscanvas = this.clearanalysisinfo()
+        if(analysisinfo.analysiskey != this.analysiskey()) return
         let i = analysisinfo.summary.length        
         for(let item of analysisinfo.summary.slice().reverse()){
             this.drawmovearrow(analysiscanvas, item.move, {
@@ -249,6 +259,11 @@ class Board_ extends SmartDomElement{
         this.drawPieces()
     }
 
+    tobegin(){
+        this.game.tobegin()
+        this.positionchanged()
+    }
+
     back(){
         this.game.back()
         this.positionchanged()
@@ -256,6 +271,11 @@ class Board_ extends SmartDomElement{
 
     forward(){
         this.game.forward()
+        this.positionchanged()
+    }
+
+    toend(){
+        this.game.toend()
         this.positionchanged()
     }
 
