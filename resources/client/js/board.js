@@ -202,6 +202,41 @@ class Board_ extends SmartDomElement{
         }
     }
 
+    arrowscalefactor(){
+        return this.boardsize() / 560
+    }
+
+    drawmovearrow(canvas, move, argsopt){
+        canvas.arrow(
+            this.squaremiddlecoords(move.fromsq),
+            this.squaremiddlecoords(move.tosq),
+            argsopt
+        )
+    }
+
+    clearanalysisinfo(){
+        let analysiscanvas = this.getCanvasByName("analysis")
+        analysiscanvas.clear()
+        return analysiscanvas
+    }
+
+    squaremiddlecoords(sq){
+        return Vect(this.fasq(sq).file, this.fasq(sq).rank).s(this.squaresize).p(Vect(this.squaresize/2, this.squaresize/2))
+    }
+
+    highlightrichanalysisinfo(richanalysisinfo){        
+        let analysisinfo = richanalysisinfo.analysisinfo
+        let analysiscanvas = this.clearanalysisinfo()
+        let i = analysisinfo.summary.length        
+        for(let item of analysisinfo.summary.slice().reverse()){
+            this.drawmovearrow(analysiscanvas, item.move, {
+                scalefactor: this.arrowscalefactor(),
+                auxscalefactor: 1/i--,
+                color: scoretorgb(item.scorenumerical)
+            })      
+        }
+    }
+
     draw(){
         this.getCanvasByName("dragpiece").clear()
 

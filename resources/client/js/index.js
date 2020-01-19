@@ -18,7 +18,9 @@ class LocalEngine extends AbstractEngine{
 
 class App extends SmartDomElement{
     processanalysisinfo(analysisinfo){
-        this.gametext.setValue(`depth ${analysisinfo.lastcompleteddepth} nps ${analysisinfo.nps || "0"}\n\n${analysisinfo.summary.map(item=>item.pvsans[0].padEnd(8, " ") + " " + item.scorenumerical.toString().padEnd(8, " ") + "-> " + item.pvsans.slice(1, Math.min(item.pvsans.length, 6)).join(" ")).join("\n")}`)
+        this.rai = new RichAnalysisInfo(analysisinfo)
+        this.gametext.setValue(this.rai.asText())
+        this.board.highlightrichanalysisinfo(this.rai)
     }
 
     go(){

@@ -150,3 +150,24 @@ function getStyle(className) {
     }    
     return cssText
 }
+
+function scoretocolor(score){
+    return Math.floor(Math.min(( Math.abs(score) / 1000.0 ) * 192.0 + 63.0, 255.0))
+}
+
+function scoretorgb(score){
+    return `rgb(${score < 0 ? scoretocolor(score) : 0},${score > 0 ? scoretocolor(score) : 0},0)`
+}
+
+function randcol(){
+	return Math.floor(128 + random() * 128)
+}
+
+function randrgb(){
+	return `rgb(${randcol()},${randcol()},${randcol()})`
+}
+
+function getelse(obj, key, defaultvalue){
+    if(key in obj) return obj[key]
+    return defaultvalue
+}

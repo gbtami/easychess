@@ -1436,3 +1436,27 @@ class AbstractEngine{
       setInterval(this.checkcommand.bind(this), 200)
   }
 }
+
+class RichAnalysisInfo{
+    constructor(analysisinfo){
+        this.analysisinfo = analysisinfo
+
+        this.board = ChessBoard().setfromfen(analysisinfo.analyzedfen, analysisinfo.variant)
+
+        this.lms = this.board.legalmovesforallpieces()
+
+        for(let item of this.analysisinfo.summary){
+            let move = this.board.movefromalgeb(item.uci)
+            item.move = move
+            let detailedmove = this.lms.find((m)=>this.board.movetoalgeb(m) == item.uci)
+            if(detailedmove){
+                item.san = this.board.movetosan(detailedmove)                
+                item.detailedmove = detailedmove                                
+            }
+        }
+    }
+
+    asText(){
+        return `depth ${this.analysisinfo.lastcompleteddepth} nps ${this.analysisinfo.nps || "0"}\n\n${this.analysisinfo.summary.map(item=>item.pvsans[0].padEnd(8, " ") + " " + item.scorenumerical.toString().padEnd(8, " ") + "-> " + item.pvsans.slice(1, Math.min(item.pvsans.length, 6)).join(" ")).join("\n")}`
+    }
+}
