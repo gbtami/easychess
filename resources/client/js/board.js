@@ -6,6 +6,8 @@ class Board_ extends SmartDomElement{
 
         this.squareopacity = this.props.squareopacity || 0.3
 
+        this.positionchangedcallback = this.props.positionchangedcallback
+
         this.game = Game({variant: this.props.variant || DEFAULT_VARIANT}).setfromfen()        
 
         this.canvasnames = [
@@ -107,6 +109,8 @@ class Board_ extends SmartDomElement{
 
     positionchanged(){
         this.draw()
+
+        if(this.positionchangedcallback) this.positionchangedcallback()
     }
 
     doflip(){
