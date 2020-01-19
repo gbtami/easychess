@@ -64,13 +64,13 @@ class App extends SmartDomElement{
                 positionchangedcallback: this.positionchanged.bind(this)
             }),
             this.controlPanel = div().mar(3).marl(0).w(this.board.boardsize() - 6).pad(3).bc("#cca").a(
-                Button("Reset", this.board.reset.bind(this.board)),
-                Button("Flip", this.board.doflip.bind(this.board)),
-                Button("<<", this.board.tobegin.bind(this.board)),                
-                Button("<", this.board.back.bind(this.board)),
-                Button(">", this.board.forward.bind(this.board)),
-                Button(">>", this.board.toend.bind(this.board)),
-                Button("X", this.board.del.bind(this.board)),
+                Button("i", this.board.reset.bind(this.board)).ff("lichess").bc("#faa"),
+                Button("B", this.board.doflip.bind(this.board)).ff("lichess").bc("#aff"),
+                Button("W", this.board.tobegin.bind(this.board)).ff("lichess").bc("#aaf"),                
+                Button("Y", this.board.back.bind(this.board)).ff("lichess").bc("#afa"),
+                Button("X", this.board.forward.bind(this.board)).ff("lichess").bc("#afa"),
+                Button("V", this.board.toend.bind(this.board)).ff("lichess").bc("#aaf"),
+                Button("L", this.board.del.bind(this.board)).ff("lichess").bc("#faa"),
                 this.gobutton = Button("Go", this.go.bind(this)).bc("#afa"),
                 this.stopbutton = Button("Stop", this.stop.bind(this)).bc("#eee")
             ),
