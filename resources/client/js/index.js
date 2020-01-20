@@ -17,16 +17,29 @@ class LocalEngine extends AbstractEngine{
 }
 
 class App extends SmartDomElement{
+    raiok(){
+        return this.rai.analysisinfo.analysiskey == this.board.analysiskey()
+    }
+
+    showanalysisinfo(){        
+        if(this.raiok()){
+            this.gametext.setValue(this.rai.asText())        
+            this.board.highlightrichanalysisinfo(this.rai)
+        }else{
+            this.gametext.setValue(`no analysis available`)        
+            this.board.clearanalysisinfo()
+        }        
+    }
+
     processanalysisinfo(analysisinfo){
         this.rai = new RichAnalysisInfo(analysisinfo)
-        this.gametext.setValue(this.rai.asText())
-
-        if(this.shouldGo){
-            this.board.highlightrichanalysisinfo(this.rai)
-        }        
+        
+        this.showanalysisinfo()
 
         this.gobutton.bc(this.rai.running ? "#eee" : "#afa")
         this.stopbutton.bc(this.rai.running ? "#faa" : "#eee")
+
+        IDB.put("engine", this.rai.analysisinfo)
     }
 
     go(){
@@ -50,7 +63,21 @@ class App extends SmartDomElement{
         if(this.shouldGo){
             this.stop()
             this.go()
+        }else{
+            IDB.get("engine", this.board.analysiskey()).then(
+                (dbResult=>{
+                    if(dbResult.hasContent){
+                        this.rai = new RichAnalysisInfo(dbResult.content)
+                        this.showanalysisinfo()
+                    }
+                })
+            )
         }
+
+        IDB.put("study", {
+            title: "Default",
+            game: this.board.game.serialize()
+        })
     }
 
     constructor(props){
@@ -79,6 +106,19 @@ class App extends SmartDomElement{
     }
 }
 
-let app = new App({id: "app"})
+initDb().then(
+    _ => {
+        let app = new App({id: "app"})
 
-document.getElementById('root').appendChild(app.e)
+        document.getElementById('root').appendChild(app.e)
+
+        IDB.getAlls(["engine", "study"]).then(
+            dbResult=>{
+                console.log(dbResult)
+            }
+        )
+    },
+    err => {
+        console.log(err.content)
+    }
+)
