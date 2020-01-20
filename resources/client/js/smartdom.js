@@ -129,7 +129,8 @@ class SmartDomElement{
     focus(){this.e.focus(); return this}
     select(){this.e.select(); return this}
     ae(kinds, callback){
-        for(let kind of kinds.split(" ")) this.e.addEventListener(kind, callback); return this
+        for(let kind of kinds.split(" ")) this.e.addEventListener(kind, callback)
+        return this
     }
     x(){
         this.e.innerHTML = ""
@@ -538,15 +539,15 @@ function ComboOption(props){return new ComboOption_(props)}
 
 class Combo_ extends SmartDomElement{
     constructor(props){
-        super("select", props)
+        super("select", props)        
     }
 
     change(){
         if(this.props.changeCallback) this.props.changeCallback(this.value())
     }
 
-    init(){
-        this.ae("change", this.change.bind(this))
+    init(){        
+        this.ae("change", this.change.bind(this))        
         this.ame(
             this.props.options.map(option=>(
                 ComboOption({value: option.value, display: option.display, selected: option.value == this.props.selected})

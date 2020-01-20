@@ -80,14 +80,29 @@ class App extends SmartDomElement{
         this.board.makeMove(lm)
     }
 
+    weightChanged(index, lm, value){        
+        this.board.game.makemove(lm)
+        this.board.game.getcurrentnode().weights[index] = value
+        this.board.game.back()        
+        this.positionchanged()
+    }
+
     buildMoves(){
-        let lms = this.board.getlms(RICH).sort((a,b)=>a.san.localeCompare(b.san))        
-        lms.sort((a,b)=>b.gameMove - a.gameMove)
-        this.movesDiv.x().a(
-            lms.map(lm=>div().ffm().dfc().a(
-                div().cp().bc(lm.gameMove ? "#ccf" : "#eee").fw(lm.gameMove ? "bold" : "normal").pad(1).mar(1).w(60).html(lm.san))
-                .ae("click", this.moveClicked.bind(this, lm))
-            )
+        let lms = this.board.getlms(RICH).sort((a,b)=>a.san.localeCompare(b.san))                
+        lms.sort((a,b)=>( ( b.gameMove - a.gameMove ) * 100 + ( b.weights[0] - a.weights[0] ) * 10 + ( b.weights[1] - a.weights[1] ) ))
+        this.movesDiv.x().ame(
+            lms.map(lm=>div().ffm().dfc().a(                                
+                div().cp().bc(lm.gameMove ? "#ccf" : "#eee").fw(lm.gameMove ? "bold" : "normal")
+                .pad(1).mar(1).w(60).html(lm.san)
+                .ae("click", this.moveClicked.bind(this, lm)),
+                ([0,1].map(index=>
+                    Combo({
+                        changeCallback: this.weightChanged.bind(this, index, lm),
+                        selected: lm.gameNode ? lm.gameNode.weights[index] : 0,
+                        options: Array(11).fill(null).map((_,i)=>({value: i, display: i}))
+                    }).mar(1)
+                )),
+            ))
         )
     }
 

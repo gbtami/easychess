@@ -57,7 +57,9 @@ class Board_ extends SmartDomElement{
         let lms = this.game.board.legalmovesforallpieces()
         if(RICH) lms.forEach(lm=>{
             lm.san = this.game.board.movetosan(lm)
-            lm.gameMove = this.game.getcurrentnode().sortedchilds().find(child=>child.gensan == lm.san) ? 1 : 0
+            lm.gameNode = this.game.getcurrentnode().sortedchilds().find(child=>child.gensan == lm.san)
+            lm.gameMove = lm.gameNode ? 1 : 0
+            lm.weights = lm.gameNode ? lm.gameNode.weights : [0,0]
         })
         return lms
     }
