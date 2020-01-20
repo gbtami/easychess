@@ -1371,6 +1371,14 @@ class AbstractEngine{
     this.analysiskey = payload.analysiskey || `analysis/${this.variant}/${strippedfen(this.analyzedfen)}`               
     this.analyzedboard = ChessBoard().setfromfen(this.analyzedfen, this.variant)
 
+    let lms = this.analyzedboard.legalmovesforallpieces()
+
+    if( lms.length < this.multipv ) this.multipv = lms.length
+
+    if(this.multipv == 0){
+        return
+    }
+
     this.analysisinfo = {      
       multipv: this.multipv,    
       analyzedfen: this.analyzedfen,        

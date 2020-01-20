@@ -116,7 +116,7 @@ class ServerEngine extends AbstractEngine{
     }
 
     processstdout(data){
-        data = data.replace(/\r/g, "")
+        data = data.replace(/\r/g, "")        
         for(let line of data.split("\n")){
             this.processstdoutline(line)
         }
