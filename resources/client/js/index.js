@@ -148,11 +148,20 @@ class App extends SmartDomElement{
 
         this.engine = new LocalEngine(this.processanalysisinfo.bind(this))
 
-        this.am(
-            this.board = Board({
-                id: "mainboard",
-                positionchangedcallback: this.positionchanged.bind(this)
-            }),
+        this.board = Board({
+            id: "mainboard",            
+            positionchangedcallback: this.positionchanged.bind(this)
+        })
+
+        this.mainPane = SplitPane({row: true, fitViewPort: true, headsize: this.board.boardsize()}),            
+
+        this.tabs = TabPane({id: "maintabpane"}).setTabs([
+            Tab({id: "moves", caption: "Moves", content: div().html("MOVES")}),
+            Tab({id: "anims", caption: "Animations", content: div().html("ANIMATIONS")})
+        ])
+
+        this.mainPane.headDiv.a(
+            this.board,
             this.controlPanel = div().mar(3).marl(0).w(this.board.boardsize() - 6).pad(3).bc("#cca").a(
                 Button("i", this.board.reset.bind(this.board)).ff("lichess").bc("#faa"),
                 Button("B", this.board.doflip.bind(this.board)).ff("lichess").bc("#aff"),
@@ -166,6 +175,14 @@ class App extends SmartDomElement{
                 this.stopbutton = Button("Stop", this.stop.bind(this)).bc("#eee")
             ),
             this.gametext = TextAreaInput().w(this.board.boardsize() - 6).h(120)
+        )
+
+        this.mainPane.setContent(
+            this.tabs
+        )
+
+        this.am(
+            this.mainPane
         )
 
         this.setupsource()        

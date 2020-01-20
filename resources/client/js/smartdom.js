@@ -157,12 +157,14 @@ class SmartDomElement{
     padl(x){return this.addStyle("paddingLeft", `${x}px`)}
     padr(x){return this.addStyle("paddingRight", `${x}px`)}
     disp(x){return this.addStyle("display", x)}    
-    df(x){return this.disp("flex")}    
+    df(x){return this.disp("flex")}        
     dib(x){return this.disp("inline-block")}    
     show(x){return this.disp(x ? "initial" : "none")}
+    fd(x){return this.addStyle("flexDirection", x)}    
     ai(x){return this.addStyle("alignItems", x)}    
     jc(x){return this.addStyle("justifyContent", x)}    
     dfc(){return this.df().ai("center")}
+    dfca(){return this.dfc().jc("space-around")}
     pos(x){return this.addStyle("position", x)}    
     por(){return this.pos("relative")}
     poa(){return this.pos("absolute")}
@@ -1348,3 +1350,139 @@ class Img_ extends SmartDomElement{
     get naturalHeight(){return this.e.naturalHeight}
 }
 function Img(props){return new Img_(props)}
+
+class SplitPane_ extends SmartDomElement{
+    constructor(props){
+        super("div", props)
+
+        this.width = this.props.width || 600
+        this.height = this.props.height || 400
+        this.headsize = this.props.headsize || 40
+
+        this.headDiv = div().dfca().bc(this.props.fitViewPort ? "#fff" : "#ddd")        
+        this.bodyDiv = div().por().bc(this.props.fitViewPort ? "#fff" : "#ffe")
+
+        this.dfc()
+
+        if(this.props.row){            
+            this.headDiv.fd("column")
+        }else{
+            this.fd("column")
+        }
+
+        this.a(this.headDiv, this.bodyDiv)
+
+        if(this.props.fitViewPort){
+            window.addEventListener("resize", this.resize.bind(this))
+        }
+
+        this.resize()
+    }
+
+    resize(widthOpt, heightOpt){
+        this.width = widthOpt || this.width
+        this.height = heightOpt || this.height
+
+        if(this.props.fitViewPort){
+            this.width = window.innerWidth
+            this.height = window.innerHeight
+            document.body.style.padding = "0px"
+            document.body.style.margin = "0px"
+        }
+
+        if(this.props.row){
+            this.bodysize = this.width - this.headsize
+            this.headDiv.w(this.headsize).h(this.height)
+            this.bodyDiv.w(this.bodysize).h(this.height)
+        }else{
+            this.bodysize = this.height - this.headsize
+            this.headDiv.w(this.width).h(this.headsize)
+            this.bodyDiv.w(this.width).h(this.bodysize)
+        }
+
+        if(this.content) this.resizeContent()
+    }
+
+    resizeContent(){
+        try{
+            if(this.props.row) this.content.resize(this.bodysize, this.height)
+            else this.content.resize(this.width, this.bodysize)
+        }catch(err){}
+    }
+
+    setContent(content){
+        this.content = content
+        this.bodyDiv.x().a(content)
+        this.resizeContent()
+    }
+}
+function SplitPane(props){return new SplitPane_(props)}
+
+class Tab_ extends SmartDomElement{
+    constructor(props){
+        super("div", props)
+
+        this.height = this.props.height || 30
+
+        this.content = this.props.content || div()
+
+        this.dib().cp().pad(3).ae("click", this.clicked.bind(this))
+    }
+
+    clicked(){
+        this.idParent().setSelected(this)
+    }
+
+    selected(selected){
+        this.isSelected = selected
+        return this.build()        
+    }
+
+    build(){
+        this.x().html(this.props.caption).bc(this.isSelected ? "#fff" : "#ccc")
+        return this
+    }
+}
+function Tab(props){return new Tab_(props)}
+
+const SKIP_BODY = true
+
+class TabPane_ extends SplitPane_{
+    constructor(props){
+        super(props)
+
+        this.tabs = []
+    }
+
+    setTabs(tabs){
+        this.tabs = tabs        
+        return this.build()
+    }
+
+    build(skipBody){
+        this.headDiv.x().a(this.tabs.map(tab=>tab.selected(tab == this.selected)))
+        if(!skipBody) this.bodyDiv.x().a(this.tabs.map(tab=>tab.content.poa().show(tab == this.selected)))
+        return this
+    }
+
+    setSelected(tab){
+        this.selected = tab        
+        if(this.selected){
+            this.state.selected = this.selected.id
+            for(let tab of this.tabs) tab.content.show(tab == this.selected)
+            this.storeState()            
+        }                
+        return this.build(SKIP_BODY)
+    }
+
+    findTabById(id){
+        return this.tabs.find(tab=>tab.id == id)
+    }
+
+    init(){                
+        if(this.tabs.length) this.selected = this.tabs[0]
+        if(this.state.selected) this.selected = this.findTabById(this.state.selected) || this.selected        
+        this.build()
+    }
+}
+function TabPane(props){return new TabPane_(props)}
