@@ -18,6 +18,7 @@ class LocalEngine extends AbstractEngine{
 
 class App extends SmartDomElement{
     raiok(){
+        if(!this.rai) return false
         return this.rai.analysisinfo.analysiskey == this.board.analysiskey()
     }
 
@@ -58,7 +59,8 @@ class App extends SmartDomElement{
     }
 
     positionchanged(){
-        this.board.clearanalysisinfo()
+        this.rai = null
+        this.showanalysisinfo()
 
         if(this.shouldGo){
             this.stop()
@@ -103,6 +105,8 @@ class App extends SmartDomElement{
             ),
             this.gametext = TextAreaInput().w(this.board.boardsize() - 6).h(120)
         )
+
+        this.positionchanged()
     }
 }
 
@@ -111,12 +115,6 @@ initDb().then(
         let app = new App({id: "app"})
 
         document.getElementById('root').appendChild(app.e)
-
-        IDB.getAlls(["engine", "study"]).then(
-            dbResult=>{
-                console.log(dbResult)
-            }
-        )
     },
     err => {
         console.log(err.content)
