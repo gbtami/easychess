@@ -110,7 +110,8 @@ class App extends SmartDomElement{
         this.board.setfromnode(node)
     }
 
-    buildTree(nodeOpt, rgbopt){
+    buildTree(nodeOpt, rgbopt, depth, maxdepth){
+        if(depth > maxdepth) return div().html("...")
         let def = this.board.game.getcurrentnode()
         for(let i=0;i<5;i++) if(def.getparent()) def = def.getparent()
         let node = nodeOpt || def
@@ -125,7 +126,7 @@ class App extends SmartDomElement{
             ae("click", this.nodeClicked.bind(this, node)),
             div().df().a(
                 node.sortedchilds().map((child)=>
-                    this.buildTree(child, rgb)
+                    this.buildTree(child, rgb, depth + 1, maxdepth)
                 )
             )
         )        
@@ -133,7 +134,7 @@ class App extends SmartDomElement{
 
     showTree(){
         seed = 10
-        this.treeDiv.x().a(this.buildTree())
+        this.treeDiv.x().a(this.buildTree(null, null, 0, 10))
     }
 
     positionchanged(){
