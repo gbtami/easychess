@@ -1,3 +1,5 @@
+const RICH = true
+
 class Board_ extends SmartDomElement{
     constructor(props){
         super("div", props)
@@ -51,8 +53,13 @@ class Board_ extends SmartDomElement{
         this.getCanvasByName("piece").clearRect(this.piececoords(sq), Vect(this.piecesize(), this.piecesize()))        
     }
 
-    getlms(){
-        return this.game.board.legalmovesforallpieces()
+    getlms(RICH){
+        let lms = this.game.board.legalmovesforallpieces()
+        if(RICH) lms.forEach(lm=>{
+            lm.san = this.game.board.movetosan(lm)
+            lm.gameMove = this.game.getcurrentnode().sortedchilds().find(child=>child.gensan == lm.san) ? 1 : 0
+        })
+        return lms
     }
 
     makeMove(move){

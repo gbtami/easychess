@@ -76,6 +76,21 @@ class App extends SmartDomElement{
         }        
     }
 
+    moveClicked(lm){
+        this.board.makeMove(lm)
+    }
+
+    buildMoves(){
+        let lms = this.board.getlms(RICH).sort((a,b)=>a.san.localeCompare(b.san))        
+        lms.sort((a,b)=>b.gameMove - a.gameMove)
+        this.movesDiv.x().a(
+            lms.map(lm=>div().ffm().dfc().a(
+                div().cp().bc(lm.gameMove ? "#ccf" : "#eee").fw(lm.gameMove ? "bold" : "normal").pad(1).mar(1).w(60).html(lm.san))
+                .ae("click", this.moveClicked.bind(this, lm))
+            )
+        )
+    }
+
     positionchanged(){
         this.rai = null
         this.showanalysisinfo()
@@ -93,6 +108,8 @@ class App extends SmartDomElement{
                 })
             )
         }
+
+        this.doLater("buildMoves", 500)
 
         this.storeStudy("Default", this.board.game.serialize())
     }
@@ -155,8 +172,10 @@ class App extends SmartDomElement{
 
         this.mainPane = SplitPane({row: true, fitViewPort: true, headsize: this.board.boardsize()}),            
 
+        this.movesDiv = div()
+
         this.tabs = TabPane({id: "maintabpane"}).setTabs([
-            Tab({id: "moves", caption: "Moves", content: div().html("MOVES")}),
+            Tab({id: "moves", caption: "Moves", content: this.movesDiv}),
             Tab({id: "anims", caption: "Animations", content: div().html("ANIMATIONS")})
         ])
 
