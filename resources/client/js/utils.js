@@ -1,5 +1,5 @@
 function IS_DEV(){
-    if(typeof PROPS != "undefined") return PROPS.IS_DEV
+    if(typeof PROPS.IS_DEV != "undefined") return PROPS.IS_DEV
     return !!document.location.host.match(/localhost/)
 }
 
@@ -33,6 +33,39 @@ function simpleFetch(url, params, callback){
         (err)=>{
             console.log("fetch error", err)
             callback({ok: false, status: "Error: failed to fetch."})
+        }
+    )
+}
+
+function api(topic, payload, callback){
+    fetch('/api', {
+        method: "POST",
+        headers: {
+           "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            topic: topic,
+            payload: payload
+        })
+    }).then(
+        (response)=>response.text().then(
+            (text)=>{
+                try{                    
+                    let response = JSON.parse(text)
+                    callback(response)
+                }catch(err){
+                    console.log("parse error", err)
+                    callback({error: "Error: Could not parse response JSON."})
+                }                
+            },
+            (err)=>{
+                console.log("api error", err)
+                callback({error: "Error: API error in get response text."})
+            }
+        ),
+        (err)=>{
+            console.log("api error", err)
+            callback({error: "Error: API error in fetch."})
         }
     )
 }
@@ -97,15 +130,6 @@ class NdjsonReader{
             }
         )
     }
-}
-
-function strippedfen(fen){
-    return fen.split(" ").slice(0, 4).join(" ")
-}
-
-function stripsan(san){
-    let strippedsan = san.replace(new RegExp(`[\+#]*`, "g"), "")
-    return strippedsan
 }
 
 function getclassforpiece(p, style){

@@ -5,6 +5,15 @@ const SUPPORTED_VARIANTS = [
 
 const DEFAULT_VARIANT = "atomic"
 
+function strippedfen(fen){
+    return fen.split(" ").slice(0, 4).join(" ")
+}
+
+function stripsan(san){
+    let strippedsan = san.replace(new RegExp(`[\+#]*`, "g"), "")
+    return strippedsan
+}
+
 class SquareDelta_{
     constructor(x, y){
         this.x = x
@@ -1467,4 +1476,8 @@ class RichAnalysisInfo{
     asText(){
         return `depth ${this.analysisinfo.lastcompleteddepth} nps ${this.analysisinfo.nps || "0"}\n\n${this.analysisinfo.summary.map(item=>item.pvsans[0].padEnd(8, " ") + " " + item.scorenumerical.toString().padEnd(8, " ") + "-> " + item.pvsans.slice(1, Math.min(item.pvsans.length, 6)).join(" ")).join("\n")}`
     }
+}
+
+if(typeof module != "undefined") if(typeof module.exports != "undefined"){
+    module.exports.AbstractEngine = AbstractEngine
 }

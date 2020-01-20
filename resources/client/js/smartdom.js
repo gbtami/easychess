@@ -27,6 +27,8 @@ class SmartDomElement{
 
         this.pathId = UID()
 
+        this.settings = this.props.settings || {}
+
         this.childs = []
         this.parent = null
 
@@ -67,7 +69,8 @@ class SmartDomElement{
     }
 
     storeState(){        
-        if(this.id){
+        if(this.id){            
+            this.settings[this.id] = this.state
             let store = JSON.stringify(this.state)                                                
             localStorage.setItem(this.path(), store)
         }

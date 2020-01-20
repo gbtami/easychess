@@ -1,10 +1,14 @@
+const STOCKFISH_JS_PATH = "resources/client/cdn/stockfish.wasm.js"
+
+const QUERY_INTERVAL = PROPS.QUERY_INTERVAL || 3000
+
 class LocalEngine extends AbstractEngine{
     constructor(sendanalysisinfo){
         super(sendanalysisinfo)
     }
 
     spawnengineprocess(){
-        this.stockfish = new Worker("resources/client/cdn/stockfish.js")
+        this.stockfish = new Worker(STOCKFISH_JS_PATH)
 
         this.stockfish.onmessage = function(message){
             this.processstdoutline(message.data)
@@ -46,16 +50,30 @@ class App extends SmartDomElement{
     go(){
         this.shouldGo = true
 
-        this.engine.setcommand("go", {
+        let payload = {
             multipv: 5,
             fen: this.board.game.fen()
-        })
+        }
+
+        if(this.settings.uselocalstockfishcheckbox.checked){
+            this.engine.setcommand("go", payload)
+        }else{
+            api("engine:go", payload, (response)=>{
+                this.clog(response)
+            })
+        }
     }
 
     stop(){
         this.shouldGo = false
 
-        this.engine.setcommand("stop")
+        if(this.settings.uselocalstockfishcheckbox.checked){
+            this.engine.setcommand("stop")
+        }else{
+            api("engine:stop", {}, (response)=>{
+                this.clog(response)
+            })
+        }        
     }
 
     positionchanged(){
@@ -82,8 +100,39 @@ class App extends SmartDomElement{
         })
     }
 
+    clog(msg){
+        if(IS_DEV()) console.log(msg)
+    }
+
+    setupsource(){
+        this.clog(`setting up event source with interval ${QUERY_INTERVAL} ms`)        
+
+        this.source = new EventSource('/stream')
+
+        this.source.addEventListener('message', function(e){
+            let analysisinfo = JSON.parse(e.data)
+            if(analysisinfo == "tick"){
+                this.lasttick = performance.now()
+            }else{
+                this.processanalysisinfo(analysisinfo)
+            }            
+        }.bind(this), false)
+
+        this.source.addEventListener('open', function(e){            
+            this.clog("connection opened")
+        }.bind(this), false)
+
+        this.source.addEventListener('error', function(e){
+            if (e.readyState == EventSource.CLOSED) {                
+                this.clog("connection closed")
+            }
+        }.bind(this), false)
+    }
+
     constructor(props){
         super("div", props)
+
+        this.settings = {}
 
         this.engine = new LocalEngine(this.processanalysisinfo.bind(this))
 
@@ -100,11 +149,14 @@ class App extends SmartDomElement{
                 Button("X", this.board.forward.bind(this.board)).ff("lichess").bc("#afa"),
                 Button("V", this.board.toend.bind(this.board)).ff("lichess").bc("#aaf"),
                 Button("L", this.board.del.bind(this.board)).ff("lichess").bc("#faa"),
+                CheckBoxInput({id: "uselocalstockfishcheckbox", settings: this.settings}),
                 this.gobutton = Button("Go", this.go.bind(this)).bc("#afa"),
                 this.stopbutton = Button("Stop", this.stop.bind(this)).bc("#eee")
             ),
             this.gametext = TextAreaInput().w(this.board.boardsize() - 6).h(120)
         )
+
+        this.setupsource()
 
         this.positionchanged()
     }
@@ -115,6 +167,8 @@ initDb().then(
         let app = new App({id: "app"})
 
         document.getElementById('root').appendChild(app.e)
+
+        app.clog(app)
     },
     err => {
         console.log(err.content)
