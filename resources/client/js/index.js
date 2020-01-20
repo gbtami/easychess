@@ -37,7 +37,7 @@ class App extends SmartDomElement{
     }
 
     processanalysisinfo(analysisinfo){
-        this.rai = new RichAnalysisInfo(analysisinfo)
+        this.rai = new RichAnalysisInfo(analysisinfo).live(true)
         
         this.showanalysisinfo()
 
