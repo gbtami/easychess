@@ -106,6 +106,36 @@ class App extends SmartDomElement{
         )
     }
 
+    nodeClicked(node){
+        this.board.setfromnode(node)
+    }
+
+    buildTree(nodeOpt, rgbopt){
+        let def = this.board.game.getcurrentnode()
+        for(let i=0;i<5;i++) if(def.getparent()) def = def.getparent()
+        let node = nodeOpt || def
+        let current = node.id == node.parentgame.currentnodeid
+        let rgb = rgbopt || randrgb()        
+        if(node.childids.length > 1) rgb = randrgb()
+        return div().mar(rgb == rgbopt ? 0 : 3).bc(rgb).dfcc().a(
+            div().w(60).cp().pad(2).bdr("solid", 3, current ? "#0f0" : "#ddd")
+            .mar(1).bc(node.gensan ? node.turn() ? "#000" : "#fff" : "#070")
+            .c(node.turn() ? "#fff" : "#000").tac()
+            .html(node.gensan ? `${node.fullmovenumber()}. ${node.gensan}` : "root").
+            ae("click", this.nodeClicked.bind(this, node)),
+            div().df().a(
+                node.sortedchilds().map((child)=>
+                    this.buildTree(child, rgb)
+                )
+            )
+        )        
+    }
+
+    showTree(){
+        seed = 10
+        this.treeDiv.x().a(this.buildTree())
+    }
+
     positionchanged(){
         this.rai = null
         this.showanalysisinfo()
@@ -125,6 +155,7 @@ class App extends SmartDomElement{
         }
 
         this.doLater("buildMoves", 500)
+        this.doLater("showTree", 500)
 
         this.storeStudy("Default", this.board.game.serialize())
     }
@@ -188,9 +219,11 @@ class App extends SmartDomElement{
         this.mainPane = SplitPane({row: true, fitViewPort: true, headsize: this.board.boardsize()}),            
 
         this.movesDiv = div()
+        this.treeDiv = div()
 
         this.tabs = TabPane({id: "maintabpane"}).setTabs([
             Tab({id: "moves", caption: "Moves", content: this.movesDiv}),
+            Tab({id: "tree", caption: "Tree", content: this.treeDiv}),
             Tab({id: "anims", caption: "Animations", content: div().html("ANIMATIONS")})
         ])
 

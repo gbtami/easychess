@@ -183,6 +183,14 @@ function scoretorgb(score){
     return `rgb(${score < 0 ? scoretocolor(score) : 0},${score > 0 ? scoretocolor(score) : 0},0)`
 }
 
+//https://stackoverflow.com/questions/521295/seeding-the-random-number-generator-in-javascript
+seed = 1
+function random(){
+    seed += 1
+    x = Math.sin(seed) * 10000
+    return x - Math.floor(x)
+}
+
 function randcol(){
 	return Math.floor(128 + random() * 128)
 }

@@ -292,5 +292,10 @@ class Board_ extends SmartDomElement{
         this.game.del()
         this.positionchanged()
     }
+
+    setfromnode(node){
+        this.game.setfromnode(node)
+        this.positionchanged()
+    }
 }
 function Board(props){return new Board_(props)}

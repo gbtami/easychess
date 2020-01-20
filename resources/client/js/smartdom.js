@@ -165,6 +165,7 @@ class SmartDomElement{
     ai(x){return this.addStyle("alignItems", x)}    
     jc(x){return this.addStyle("justifyContent", x)}    
     dfc(){return this.df().ai("center")}
+    dfcc(){return this.df().fd("column").ai("center")}
     dfca(){return this.dfc().jc("space-around")}
     pos(x){return this.addStyle("position", x)}    
     por(){return this.pos("relative")}
