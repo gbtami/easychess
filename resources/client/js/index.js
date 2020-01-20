@@ -94,10 +94,7 @@ class App extends SmartDomElement{
             )
         }
 
-        IDB.put("study", {
-            title: "Default",
-            game: this.board.game.serialize()
-        })
+        this.storeStudy("Default", this.board.game.serialize())
     }
 
     clog(msg){
@@ -129,6 +126,21 @@ class App extends SmartDomElement{
         }.bind(this), false)
     }
 
+    loadStudy(study){
+        IDB.get("study", study).then(result=>{            
+            if(result.hasContent){                
+                this.board.setgame(Game().fromblob(result.content.game))
+            }
+        })
+    }
+
+    storeStudy(title, game){
+        IDB.put("study", {
+            title: title,
+            game: game
+        })
+    }
+
     constructor(props){
         super("div", props)
 
@@ -156,7 +168,9 @@ class App extends SmartDomElement{
             this.gametext = TextAreaInput().w(this.board.boardsize() - 6).h(120)
         )
 
-        this.setupsource()
+        this.setupsource()        
+
+        this.loadStudy("Default")
 
         this.positionchanged()
     }

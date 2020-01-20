@@ -14,7 +14,7 @@ function dbResult(ok, content){
     return {
         ok: ok,
         content: content,
-        hasContent: !!content
+        hasContent: ( !!content ) && ok
     }
 }
 
