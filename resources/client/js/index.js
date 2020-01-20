@@ -117,7 +117,7 @@ class App extends SmartDomElement{
         let current = node.id == node.parentgame.currentnodeid
         let rgb = rgbopt || randrgb()        
         if(node.childids.length > 1) rgb = randrgb()
-        return div().mar(rgb == rgbopt ? 0 : 3).bc(rgb).dfcc().a(
+        return div().ac("unselectable").mar(rgb == rgbopt ? 0 : 3).bc(rgb).dfcc().a(
             div().w(60).cp().pad(2).bdr("solid", 3, current ? "#0f0" : "#ddd")
             .mar(1).bc(node.gensan ? node.turn() ? "#000" : "#fff" : "#070")
             .c(node.turn() ? "#fff" : "#000").tac()
