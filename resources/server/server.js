@@ -181,4 +181,8 @@ app.get('/', (req, res) => res.send(`
 </html>
 `))
 
+app.get('/gif.worker.js', function(req, res) {  
+    res.sendFile(`${__rootdirname}/resources/client/cdn/gif.worker.js`)
+})
+
 app.listen(PORT, () => console.log(`easychess server serving from < ${__rootdirname} > listening on port < ${PORT} >!`))

@@ -360,6 +360,38 @@ class App extends SmartDomElement{
         }
     }
 
+    playAnimation(task){
+        if(this.recordAnimation){
+            if(this.recordAnimationCycle > 1){
+                this.recordAnimation = false
+                task = stop
+                this.render()
+            }
+        }
+
+        if(task == "record"){            
+            this.moveAnimationForward({task: "toend"})            
+            this.recordAnimation = true            
+            this.initgif()
+            this.recordAnimationCycle = 0
+            task = "play"
+        }
+
+        if(task == "play"){
+            if(this.moveAnimationForward()){                
+                this.playtimeout = setTimeout(this.playAnimation.bind(this, "play"), 1000)
+            }                
+            else{
+                task = "stop"
+            }
+        }
+
+        if(task == "stop"){
+            if(this.playtimeout) clearTimeout(this.playtimeout)
+            this.recordAnimation = false
+        }
+    }
+
     buildAnimsDiv(){
         let g = this.board.game
 
@@ -376,7 +408,13 @@ class App extends SmartDomElement{
             forceZIndex: 20
         }).mar(5)
 
-        this.animsDiv.x().a(
+        this.animsDiv.x().a(            
+            div().a(
+                Button("Step", this.moveAnimationForward.bind(this)).mar(5),
+                Button("Play", this.playAnimation.bind(this, "play")).mar(5),
+                Button("Stop", this.playAnimation.bind(this, "stop")).mar(5),
+                Button("Record", this.playAnimation.bind(this, "record")).mar(5)
+            ),
             this.animsEditableList
         )
 
@@ -400,6 +438,63 @@ class App extends SmartDomElement{
         }
 
         this.animsDiv.ame()
+    }
+
+    record(){
+        let props = this.board.game.getcurrentnode().props()
+
+        let canvas = Canvas({width: this.board.boardsize(), height: this.board.boardsize()})
+        
+        canvas.ctx.drawImage(this.board.getCanvasByName("background").e, 0, 0)
+        canvas.ctx.globalAlpha = 0.3
+        canvas.ctx.drawImage(this.board.getCanvasByName("square").e, 0, 0)
+        canvas.ctx.globalAlpha = 1
+        canvas.ctx.drawImage(this.board.getCanvasByName("piece").e, 0, 0)
+        canvas.ctx.drawImage(this.board.getCanvasByName("drawings").e, 0, 0)
+
+        this.gif.addFrame(canvas.e, {delay: props.delay || 1000})
+    }
+
+    render(){
+        this.gif.render()
+    }
+
+    moveAnimationForward(argOpt){
+        let arg = argOpt || {}
+        let g = this.board.game
+
+        let selanim = g.selectedAnimation
+
+        if(selanim){
+            let animdesc = g.animationDescriptors[selanim.value]
+
+            if(animdesc) if(animdesc.selected) if(animdesc.list) if(animdesc.list.length){
+                let selnodeid = animdesc.selected.value
+                let i = animdesc.list.findIndex(opt=>opt.value == selnodeid)
+                if((i>=0)){
+                    if(arg.task == "toend"){                        
+                        i = animdesc.list.length - 1
+                    }else{
+                        i++
+                        if(i >= animdesc.list.length) i = 0                                        
+                    }                   
+
+                    animdesc.selected = animdesc.list[i]
+                    selnodeid = animdesc.list[i].value                    
+                    this.board.setfromnode(g.gamenodes[selnodeid])                    
+
+                    if(this.recordAnimation){
+                        if(i==0) this.recordAnimationCycle++
+                        if(this.recordAnimationCycle < 2){
+                            this.record()
+                        }
+                    }
+
+                    return true
+                }
+            }
+        }        
+        return false
     }
 
     constructor(props){
@@ -474,6 +569,17 @@ class App extends SmartDomElement{
         this.positionchanged()
 
         this.showImages()
+    }
+
+    initgif(){
+        this.gif = new GIF({
+            workers: 2,
+            quality: 10
+        })
+    
+        this.gif.on('finished', function(blob) {
+            window.open(URL.createObjectURL(blob));
+        })
     }
 }
 
