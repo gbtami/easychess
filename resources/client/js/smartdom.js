@@ -1338,20 +1338,20 @@ class Canvas_ extends SmartDomElement{
         return dt
     }
 
-    bimgLoaded(){
-        let mulx = Math.floor(this.width / this.bimg.naturalWidth) + 1
-        let muly = Math.floor(this.height / this.bimg.naturalHeight) + 1                
-        for(let x = 0; x < mulx; x++) for(let y = 0; y < muly; y++){
-            this.ctx.drawImage(this.bimg.e, x * this.bimg.naturalWidth, y * this.bimg.naturalHeight)
-        }
-    }
-
     loadBackgroundImage(url){
-        this.bimg = Img()
-        this.bimg.e.addEventListener("load", this.bimgLoaded.bind(this))
-        this.bimg.src = url
+        return new Promise((resolve, _)=>{
+            let bimg = Img()
+            bimg.ae("load", ()=>{
+                let mulx = Math.floor(this.width / bimg.naturalWidth) + 1
+                let muly = Math.floor(this.height / bimg.naturalHeight) + 1                
+                for(let x = 0; x < mulx; x++) for(let y = 0; y < muly; y++){
+                    this.ctx.drawImage(bimg.e, x * bimg.naturalWidth, y * bimg.naturalHeight)
+                }
+                resolve(true)
+            })
+            bimg.src = url
+        })
     }
-
 }
 function Canvas(props){return new Canvas_(props)}
 
