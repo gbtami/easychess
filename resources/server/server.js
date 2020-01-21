@@ -5,6 +5,7 @@ const spawn = require('child_process').spawn
 const { readJson } = require('../utils/rwjson')
 const sse = require('./sse')
 const { AbstractEngine } = require('../shared/js/chessboard')
+const { fromchunks } = require('../utils/firebase')
 
 const app = express()
 
@@ -30,6 +31,23 @@ function clog(msg){
 }
 
 const __rootdirname = path.join(__dirname, '../..')
+
+let sacckeypath = path.join(__rootdirname, "firebase/sacckey.json")
+
+fromchunks(sacckeypath)
+
+const admin = require("firebase-admin")
+
+admin.initializeApp({
+    credential: admin.credential.cert(sacckeypath),
+    storageBucket: "pgneditor-1ab96.appspot.com"
+})
+
+bucket = admin.storage().bucket()
+
+bucket.upload(path.join(__rootdirname, "ReadMe.md"), {destination: "ReadMe.md"}, (err, _, apiResoponse)=>{
+    console.log(err ? "bucket test failed" : `bucket test ok, uploaded ReadMe.md, size ${apiResoponse.size}`)
+})    
 
 const STOCKFISH_PATH = path.join(__dirname, "bin/stockfish")
 
