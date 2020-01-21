@@ -386,12 +386,14 @@ class TextAreaInput_ extends SmartDomElement{
     init(){        
         this.ae("keyup", this.textChanged.bind(this))
         this.ae("change", this.textChanged.bind(this))
+        if(typeof this.props.text != "undefined") this.state.text = this.props.text
         this.setFromState()
     }
 
     textChanged(){        
         this.state.text = this.value()
         this.storeState()
+        if(this.props.changeCallback) this.props.changeCallback(this.state.text)
     }
 
     setFromState(){

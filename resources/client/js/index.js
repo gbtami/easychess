@@ -87,22 +87,33 @@ class App extends SmartDomElement{
         this.positionchanged()
     }
 
+    commentChanged(value){
+        this.board.game.getcurrentnode().comment = value
+        this.doLater("storeDefault", 1000)
+    }
+
     buildMoves(){
         let lms = this.board.getlms(RICH).sort((a,b)=>a.san.localeCompare(b.san))                
         lms.sort((a,b)=>( ( b.gameMove - a.gameMove ) * 100 + ( b.weights[0] - a.weights[0] ) * 10 + ( b.weights[1] - a.weights[1] ) ))
-        this.movesDiv.x().ame(
-            lms.map(lm=>div().ffm().dfc().a(                                
-                div().cp().bc(lm.gameMove ? "#ccf" : "#eee").fw(lm.gameMove ? "bold" : "normal")
-                .pad(1).mar(1).w(60).html(lm.san)
-                .ae("click", this.moveClicked.bind(this, lm)),
-                ([0,1].map(index=>
-                    Combo({
-                        changeCallback: this.weightChanged.bind(this, index, lm),
-                        selected: lm.gameNode ? lm.gameNode.weights[index] : 0,
-                        options: Array(11).fill(null).map((_,i)=>({value: i, display: i}))
-                    }).mar(1)
-                )),
-            ))
+        this.movesDiv.hh(this.board.boardsize()).x().df().ame(
+            div().ovfys().a(
+                lms.map(lm=>div().ffm().dfc().a(                                
+                    div().cp().bc(lm.gameMove ? "#ccf" : "#eee").fw(lm.gameMove ? "bold" : "normal")
+                    .pad(1).mar(1).w(60).html(lm.san)
+                    .ae("click", this.moveClicked.bind(this, lm)),
+                    ([0,1].map(index=>
+                        Combo({
+                            changeCallback: this.weightChanged.bind(this, index, lm),
+                            selected: lm.gameNode ? lm.gameNode.weights[index] : 0,
+                            options: Array(11).fill(null).map((_,i)=>({value: i, display: i}))
+                        }).mar(1)
+                    )),
+                ))
+            ),
+            this.commentTextArea = TextAreaInput({
+                text: this.board.game.getcurrentnode().comment,
+                changeCallback: this.commentChanged.bind(this)
+            }).fs(16).w(300)
         )
     }
 
@@ -137,6 +148,10 @@ class App extends SmartDomElement{
         this.treeDiv.x().a(this.buildTree(null, null, 0, 10))
     }
 
+    storeDefault(){
+        this.storeStudy("Default", this.board.game.serialize())
+    }
+
     positionchanged(){
         this.rai = null
         this.showanalysisinfo()
@@ -158,7 +173,7 @@ class App extends SmartDomElement{
         this.doLater("buildMoves", 500)
         this.doLater("showTree", 500)
 
-        this.storeStudy("Default", this.board.game.serialize())
+        this.storeDefault()
     }
 
     clog(msg){
@@ -235,7 +250,7 @@ class App extends SmartDomElement{
         this.imageDiv.x().a(div().marl(10).mart(6).html("Images loading ..."))
         IDB.getAll("image").then(result=>{
             if(result.ok){
-                this.imageDiv.dfca().flww().x().a(
+                this.imageDiv.x().a(
                     result.content.map(item=>
                         div().mar(3).dib().pad(3).bc("#aff").a(
                             div().dfcc().a(
@@ -291,7 +306,7 @@ class App extends SmartDomElement{
                 case "dragenter":
                 case "dragover":
                     sev.ev.preventDefault()
-                    this.imageDiv.bc("#7f7")
+                    this.imageDiv.dfca().flww().bc("#777")
                     break
                 case "dragleave":
                     this.imageDiv.bc("#777")
@@ -331,6 +346,10 @@ class App extends SmartDomElement{
         this.imageDiv.resize = function(width, height){                        
             this.w(width - 20).mih(height - 20)
         }.bind(this.imageDiv)
+
+        this.movesDiv.resize = function(width, height){                        
+            this.buildMoves()
+        }.bind(this)
 
         this.tabs = TabPane({id: "maintabpane"}).setTabs([
             Tab({id: "moves", caption: "Moves", content: this.movesDiv}),
