@@ -377,19 +377,34 @@ class App extends SmartDomElement{
             task = "play"
         }
 
-        if(task == "play"){
-            if(this.moveAnimationForward()){                
-                this.playtimeout = setTimeout(this.playAnimation.bind(this, "play"), 1000)
-            }                
-            else{
-                task = "stop"
+        let stopfunc = function(){
+            if(this.playtimeout){
+                clearTimeout(this.playtimeout)
+                this.playtimeout = null
+            }
+            this.recordAnimation = false
+        }.bind(this)
+
+        if(task == "play"){            
+            let contfunc = function(maf){
+                if(maf){                
+                    this.playtimeout = setTimeout(this.playAnimation.bind(this, "play"), 1000)
+                }                
+                else{
+                    stopfunc()
+                }
+            }.bind(this)   
+
+            let maf = this.moveAnimationForward()
+
+            if(typeof maf == "boolean"){
+                contfunc(maf)
+            }else{                
+                maf.then(maf => contfunc(maf))
             }
         }
 
-        if(task == "stop"){
-            if(this.playtimeout) clearTimeout(this.playtimeout)
-            this.recordAnimation = false
-        }
+        if(task == "stop") stopfunc()
     }
 
     buildAnimsDiv(){
@@ -441,24 +456,66 @@ class App extends SmartDomElement{
     }
 
     record(){
-        let bs = this.board.boardsize()
-        let props = this.board.game.getcurrentnode().props()
+        return new Promise((resolve, reject)=>{
+            let bs = this.board.boardsize()
+            let props = this.board.game.getcurrentnode().props()
 
-        let canvas = Canvas({width: 2 * bs, height: bs})
+            let canvas = Canvas({width: 2 * bs, height: bs})
 
-        canvas.fillStyle("#FFFFFF")
-        canvas.fillRect(Vect(0,0), Vect(2*bs,bs))
-        
-        canvas.ctx.drawImage(this.board.getCanvasByName("background").e, 0, 0)
-        canvas.ctx.globalAlpha = 0.3
-        canvas.ctx.drawImage(this.board.getCanvasByName("square").e, 0, 0)
-        canvas.ctx.globalAlpha = 1
-        canvas.ctx.drawImage(this.board.getCanvasByName("piece").e, 0, 0)
-        canvas.ctx.drawImage(this.board.getCanvasByName("drawings").e, 0, 0)
+            canvas.fillStyle("#FFFFFF")
+            canvas.fillRect(Vect(0,0), Vect(2*bs,bs))
+            
+            canvas.ctx.drawImage(this.board.getCanvasByName("background").e, 0, 0)
+            canvas.ctx.globalAlpha = 0.3
+            canvas.ctx.drawImage(this.board.getCanvasByName("square").e, 0, 0)
+            canvas.ctx.globalAlpha = 1
+            canvas.ctx.drawImage(this.board.getCanvasByName("piece").e, 0, 0)
+            canvas.ctx.drawImage(this.board.getCanvasByName("drawings").e, 0, 0)
 
-        canvas.ctx.drawImage(this.board.commentcanvas.e, bs, 0)
+            let finalizefunc = function(){
+                canvas.ctx.drawImage(this.board.commentcanvas.e, bs, 0)
 
-        this.gif.addFrame(canvas.e, {delay: props.delay || 1000})
+                this.gif.addFrame(canvas.e, {delay: props.delay || 1000})
+
+                resolve(true)
+            }.bind(this)            
+
+            let drawings = this.board.game.getcurrentnode().drawings()
+
+            let imageName = null
+            let drawing = null
+            for(let drw of drawings){
+                if(drw.kind == "image"){                    
+                    imageName = drw.name
+                    drawing = drw                    
+                    break
+                }
+            }
+
+            if(imageName){
+                IDB.get("image", imageName).then(
+                    result=>{
+                        if(result.hasContent){
+                            let img = Img()
+                            img.e.addEventListener("load", ()=>{
+                                let ds = bs * drawing.thickness / 9
+                                let dm = ( bs - ds ) / 2
+                                canvas.ctx.globalAlpha = drawing.opacity / 9
+                                canvas.ctx.drawImage(img.e, bs + dm, dm, ds, ds)
+                                canvas.ctx.globalAlpha = 1
+                                finalizefunc()
+                            })
+                            img.src = result.content.imgsrc
+                        }else{
+                            finalizefunc()
+                        }
+                    },
+                    _=>finalizefunc()
+                )
+            }else{
+                finalizefunc()
+            }
+        })        
     }
 
     render(){
@@ -492,7 +549,7 @@ class App extends SmartDomElement{
                     if(this.recordAnimation){
                         if(i==0) this.recordAnimationCycle++
                         if(this.recordAnimationCycle < 2){
-                            this.record()
+                            return this.record()
                         }
                     }
 
