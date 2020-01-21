@@ -222,6 +222,89 @@ class App extends SmartDomElement{
         })
     }
 
+    alert(msg){
+        this.alertDiv.show(true).html(msg)
+        setTimeout(()=>{this.alertDiv.show(false)}, 3000)
+    }
+
+    deleteImage(name){
+        IDB.delete("image", name).then(_=>this.showImages())
+    }
+
+    showImages(){
+        this.imageDiv.x().a(div().marl(10).mart(6).html("Images loading ..."))
+        IDB.getAll("image").then(result=>{
+            if(result.ok){
+                this.imageDiv.dfca().flww().x().a(
+                    result.content.map(item=>
+                        div().mar(3).dib().pad(3).bc("#aff").a(
+                            div().dfcc().a(
+                                div().html(item.name),
+                                Button(`Delete ${item.name}`, this.deleteImage.bind(this, item.name)).mar(5),
+                                Img({src: item.imgsrc, width: 150, height: 150})
+                            )
+                        )
+                    )
+                )
+            }
+        })
+    }
+
+    uploadimage(content, nameorig){
+        let canvas = this.board.getCanvasByName("dragpiece")
+        let img = Img()                
+        img.e.onload = ()=>{                    
+            canvas.ctx.drawImage(img.e, 0, 0)        
+            let offername = nameorig.replace(/\.JPG$|\.PNG$|\.GIF$/i, "")
+            let name = window.prompt("Image name :", offername)
+            IDB.put("image", {
+                name: name,
+                imgsrc: content
+            }).then(result => {
+                if(result.ok){
+                    this.alert(`Image ${name} stored.`)
+                    this.showImages()
+                    setTimeout(function(){canvas.clear()}.bind(this), 3000)
+                }else{
+                    this.alert(`Storing image ${name} failed.`)
+                }
+            })  
+        }
+        img.src = content                
+    }
+
+    dropImages(files){
+        let file = files[0]
+        let reader = new FileReader()
+
+        reader.onload = event => {          
+            let content = event.target.result            
+            this.uploadimage(content, file.name)
+        }
+
+        reader.readAsDataURL(file)                
+    }
+
+    handleEvent(sev){
+        if(sev.do == "dragimage"){
+            switch(sev.kind){
+                case "dragenter":
+                case "dragover":
+                    sev.ev.preventDefault()
+                    this.imageDiv.bc("#7f7")
+                    break
+                case "dragleave":
+                    this.imageDiv.bc("#777")
+                    break
+                case "drop":
+                    sev.ev.preventDefault()                    
+                    this.imageDiv.bc("#777")
+                    this.dropImages(sev.ev.dataTransfer.files)
+                    break
+            }
+        }
+    }
+
     constructor(props){
         super("div", props)
 
@@ -234,14 +317,25 @@ class App extends SmartDomElement{
             positionchangedcallback: this.positionchanged.bind(this)
         })
 
-        this.mainPane = SplitPane({row: true, fitViewPort: true, headsize: this.board.boardsize()}),            
+        this.mainPane = SplitPane({row: true, fitViewPort: true, headsize: this.board.boardsize()}).por(),            
+
+        this.alertDiv = div().poa().t(50).l(50).show(false).bc("#ffa")
+        .bdr("solid", 5, "#777", 10).w(600).pad(10).zi(1000).tac()
+
+        this.mainPane.a(this.alertDiv)
 
         this.movesDiv = div()
         this.treeDiv = div()
+        this.imageDiv = div({ev: "dragenter dragover dragleave drop", do: "dragimage"}).bc("#999")
+
+        this.imageDiv.resize = function(width, height){                        
+            this.w(width - 20).mih(height - 20)
+        }.bind(this.imageDiv)
 
         this.tabs = TabPane({id: "maintabpane"}).setTabs([
             Tab({id: "moves", caption: "Moves", content: this.movesDiv}),
             Tab({id: "tree", caption: "Tree", content: this.treeDiv}),
+            Tab({id: "images", caption: "Images", content: this.imageDiv}),
             Tab({id: "anims", caption: "Animations", content: div().html("ANIMATIONS")})
         ])
 
@@ -262,9 +356,7 @@ class App extends SmartDomElement{
             this.gametext = TextAreaInput().w(this.board.boardsize() - 6).h(120)
         )
 
-        this.mainPane.setContent(
-            this.tabs
-        )
+        this.mainPane.setContent(this.tabs)
 
         this.am(
             this.mainPane
@@ -277,6 +369,8 @@ class App extends SmartDomElement{
         this.loadStudy("Default")
 
         this.positionchanged()
+
+        this.showImages()
     }
 }
 

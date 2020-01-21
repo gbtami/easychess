@@ -167,6 +167,8 @@ class SmartDomElement{
     dfc(){return this.df().ai("center")}
     dfcc(){return this.df().fd("column").ai("center")}
     dfca(){return this.dfc().jc("space-around")}
+    flw(x){return this.addStyle("flexWrap", x)}    
+    flww(){return this.flw("wrap")}
     pos(x){return this.addStyle("position", x)}    
     por(){return this.pos("relative")}
     poa(){return this.pos("absolute")}
@@ -1332,6 +1334,10 @@ class Img_ extends SmartDomElement{
         this.props = propsOpt || {}
 
         this.width(this.props.width || 100).height(this.props.height || 100)
+
+        if(this.props.src){
+            this.src = this.props.src
+        }
     }
 
     width(width){
@@ -1345,7 +1351,7 @@ class Img_ extends SmartDomElement{
     }
 
     set src(src){
-        this.e.src = src
+        this.e.src = src        
     }
 
     get naturalWidth(){return this.e.naturalWidth}
@@ -1403,13 +1409,17 @@ class SplitPane_ extends SmartDomElement{
         }
 
         if(this.content) this.resizeContent()
+
+        try{            
+            this.resizeTask() 
+        }catch(err){err}
     }
 
     resizeContent(){
         try{
             if(this.props.row) this.content.resize(this.bodysize, this.height)
             else this.content.resize(this.width, this.bodysize)
-        }catch(err){}
+        }catch(err){}        
     }
 
     setContent(content){
@@ -1456,6 +1466,10 @@ class TabPane_ extends SplitPane_{
         this.tabs = []
     }
 
+    resizeTask(){                
+        this.build()
+    }
+
     setTabs(tabs){
         this.tabs = tabs        
         return this.build()
@@ -1463,13 +1477,19 @@ class TabPane_ extends SplitPane_{
 
     build(skipBody){
         this.headDiv.x().a(this.tabs.map(tab=>tab.selected(tab == this.selected)))
-        if(!skipBody) this.bodyDiv.x().a(this.tabs.map(tab=>tab.content.poa().show(tab == this.selected)))
+        if(!skipBody) this.bodyDiv.x().a(this.tabs.map(tab=>tab.content.poa().show(tab == this.selected)))        
+        if(this.selected){
+            let f = this.selected.content.resize
+            try{                
+                this.row ? f(this.bodysize, this.height) : f(this.width, this.bodysize)
+            }catch(err){}            
+        }
         return this
     }
 
     setSelected(tab){
         this.selected = tab        
-        if(this.selected){
+        if(this.selected){            
             this.state.selected = this.selected.id
             for(let tab of this.tabs) tab.content.show(tab == this.selected)
             this.storeState()            
@@ -1483,7 +1503,7 @@ class TabPane_ extends SplitPane_{
 
     init(){                
         if(this.tabs.length) this.selected = this.tabs[0]
-        if(this.state.selected) this.selected = this.findTabById(this.state.selected) || this.selected        
+        if(this.state.selected) this.selected = this.findTabById(this.state.selected) || this.selected                
         this.build()
     }
 }

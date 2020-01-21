@@ -5,7 +5,8 @@ const DB_FAILED = false
 
 const OBJECT_STORES = [
     {name: "engine", keyPath: "analysiskey"},
-    {name: "study", keyPath: "title"}
+    {name: "study", keyPath: "title"},
+    {name: "image", keyPath: "name"},
 ]
 
 const DATABASE_VERSION = OBJECT_STORES.length
@@ -43,7 +44,7 @@ class IndexedDB{
                 resolve(dbResult(DB_OK, event))
             }
 
-            request.onerror = function(event) {
+            requestUpdate.onerror = function(event) {
                 reject(dbResult(DB_FAILED, event))
             }
         })        
