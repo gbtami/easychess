@@ -1233,9 +1233,9 @@ class Canvas_ extends SmartDomElement{
         return this.e.width
     }
 
-    circle(x, y, r){
+    strokeCircle(orig, r){
         this.ctx.beginPath()
-        this.ctx.arc(x, y, r, 0, 2 * Math.PI, false)
+        this.ctx.arc(orig.x, orig.y, r, 0, 2 * Math.PI, false)
         this.ctx.stroke()
     }
 
@@ -1277,6 +1277,14 @@ class Canvas_ extends SmartDomElement{
 
     fillStyle(fs){
         this.ctx.fillStyle = fs
+    }
+
+    strokeStyle(ss){
+        this.ctx.strokeStyle = ss
+    }
+
+    lineWidth(lw){
+        this.ctx.lineWidth = lw
     }
 
     fillRect(orig, size){

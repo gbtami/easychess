@@ -87,9 +87,14 @@ class App extends SmartDomElement{
         this.positionchanged()
     }
 
+    highlightDrawings(){
+        this.board.highlightDrawings()
+    }
+
     commentChanged(value){
         this.board.game.getcurrentnode().comment = value
         this.doLater("storeDefault", 1000)
+        this.doLater("highlightDrawings", 250)
     }
 
     buildMoves(){
@@ -115,6 +120,8 @@ class App extends SmartDomElement{
                 changeCallback: this.commentChanged.bind(this)
             }).fs(16).w(300)
         )
+
+        this.commentTextArea.focus()
     }
 
     nodeClicked(node){

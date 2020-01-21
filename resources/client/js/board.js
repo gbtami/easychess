@@ -266,6 +266,8 @@ class Board_ extends SmartDomElement{
         this.drawSquares()
 
         this.drawPieces()
+
+        this.highlightDrawings()
     }
 
     tobegin(){
@@ -296,6 +298,64 @@ class Board_ extends SmartDomElement{
     setfromnode(node){
         this.game.setfromnode(node)
         this.positionchanged()
+    }
+
+    calcdrawingstyle(r,g,b,o){
+        return `rgb(${r},${g},${b},${(o+1)/10})` 
+    }
+
+    getdrawingcolor(drawing){
+        return {
+            red: this.calcdrawingstyle(255,0,0,drawing.opacity),
+            green: this.calcdrawingstyle(0,127,0,drawing.opacity),
+            blue: this.calcdrawingstyle(0,0,255,drawing.opacity),
+            yellow: this.calcdrawingstyle(192,192,0,drawing.opacity)
+        }[drawing.color]
+    }
+
+    calcdrawingsize(size){
+        return size * this.squaresize / 60
+    }
+
+    highlightDrawings(){        
+        let drawings = this.game.getcurrentnode().drawings()        
+        let drawingscanvas = this.getCanvasByName("drawings")
+        drawingscanvas.clear()
+        let b = this.game.board
+        for(let drawing of drawings){                     
+            try{
+                let squares = drawing.squares.map(algeb=>this.fasq(b.algebtosquare(algeb)))
+                switch(drawing.kind){
+                    case "circle":                                        
+                        for(let sq of squares){                            
+                            let sqmc = this.squaremiddlecoords(sq)
+                            drawingscanvas.lineWidth(this.calcdrawingsize(drawing.thickness))
+                            drawingscanvas.strokeStyle(this.getdrawingcolor(drawing))
+                            drawingscanvas.strokeCircle(sqmc, this.squaresize / 2.5)                            
+                        }
+                        break
+                    case "arrow":
+                        for(let i=0;i<squares.length/2;i++){
+                            let move = Move(squares[i*2], squares[i*2+1])                                                        
+                            this.drawmovearrow(drawingscanvas, move, {
+                                color: this.getdrawingcolor(drawing),
+                                auxscalefactor: drawing.thickness / 5
+                            })
+                        }
+                        break
+                    case "square":                                        
+                        drawing.opacity /= 2
+                        for(let sq of squares){
+                            let sqc = this.squarecoords(sq)
+                            drawingscanvas.fillStyle(this.getdrawingcolor(drawing))
+                            drawingscanvas.fillRect(sqc.p(Vect(this.piecemargin(), this.piecemargin())), Vect(this.piecesize(), this.piecesize()))
+                        }
+                        break
+                }
+            }catch(err){
+                console.log(err)
+            }            
+        }
     }
 }
 function Board(props){return new Board_(props)}

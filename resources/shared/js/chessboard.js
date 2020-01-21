@@ -736,6 +736,118 @@ class ChessBoard_{
 }
 function ChessBoard(props){return new ChessBoard_(props)}
 
+function parseDrawing(comment){
+    if(comment.match(/:/)) return null
+
+    let drawing = {
+        kind: "circle",
+        color: "green",
+        thickness: 5,
+        opacity: 9,
+        squares: []
+    }   
+
+    let sqstr = null 
+
+    if(comment.includes("@")){
+        let parts = comment.split("@")
+        comment = parts[0]
+        sqstr = parts[1]
+    }
+
+    let ok
+
+    do{
+        ok = false
+
+        let m = comment.match(/^([lwxz])(.*)/)    
+
+        if(m){
+            drawing.kind = {l: "circle", w: "arrow", x: "square", z: "image"}[m[1]]
+            comment = m[2]
+            ok = true
+        }
+
+        m = comment.match(/^([rnuy])(.*)/)
+        if(m){
+            drawing.color = {r: "red", n: "green", u: "blue", y: "yellow"}[m[1]]
+            comment = m[2]
+            ok = true
+        }
+        m = comment.match(/^t([0-9])(.*)/)
+        if(m){
+            drawing.thickness = parseInt(m[1])
+            comment = m[2]
+            ok = true
+        }
+        m = comment.match(/^o([0-9])(.*)/)
+        if(m){
+            drawing.opacity = parseInt(m[1])
+            comment = m[2]
+            ok = true
+        }
+    }while(ok)
+
+    ok = true
+
+    if(sqstr) comment = sqstr
+
+    if(drawing.kind == "image"){
+        m = comment.match(/^([^\s#]*)(.*)/)
+        drawing.name = m[1]
+        return drawing
+    }
+
+    do{        
+        m = comment.match(/^([a-z][0-9])(.*)/)
+        if(m){            
+            drawing.squares.push(m[1])
+            comment = m[2]
+        }else{
+            ok = false
+        }
+    }while(ok)
+
+    return drawing
+}
+
+function parseDrawings(comment){
+    let drawings = []
+
+    let ok = true
+
+    do{
+        let m = comment.match(/([^#]*)#([^#\s]*)(.*)/)
+        if(m){
+            comment = m[1] + m[3]
+            let pd = parseDrawing(m[2])
+            if(pd) drawings.push(pd)
+        }else{
+            ok = false
+        }
+    }while(ok)
+
+    return drawings
+}
+
+function parseProps(comment){
+    let props = {}
+
+    let ok = true
+
+    do{
+        let m = comment.match(/([^#]*)#([^#:]+):([^#\s]*)(.*)/)
+        if(m){
+            comment = m[1] + m[4]
+            props[m[2]] = m[3]
+        }else{
+            ok = false
+        }
+    }while(ok)
+
+    return props
+}
+
 const EXCLUDE_THIS = true
 
 class GameNode_{
