@@ -12,6 +12,8 @@ const PORT = process.env.PORT || 3000
 
 const MAX_SSE_CONNECTIONS = 100
 
+const QUERY_INTERVAL = 3000
+
 const AUTH_TOPICS = []
 
 function IS_DEV(){
@@ -107,7 +109,8 @@ app.post('/api', (req, res) => {
 })
 
 const PROPS = {
-    IS_DEV: IS_DEV()
+    IS_DEV: IS_DEV(),
+    QUERY_INTERVAL: QUERY_INTERVAL
 }
 
 class ServerEngine extends AbstractEngine{
@@ -141,6 +144,10 @@ class ServerEngine extends AbstractEngine{
 }
 
 let engine = new ServerEngine(ssesend)
+
+setInterval(function(){
+    ssesend({kind: "tick"})
+}, QUERY_INTERVAL)
 
 app.get('/', (req, res) => res.send(`
 <!DOCTYPE html>

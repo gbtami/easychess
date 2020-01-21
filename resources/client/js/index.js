@@ -165,6 +165,21 @@ class App extends SmartDomElement{
         if(IS_DEV()) console.log(msg)
     }
 
+    checksource(){
+        let elapsed = performance.now() - this.lasttick
+
+        if(elapsed > 2 * QUERY_INTERVAL){
+            this.clog(`event source timed out, setting up new`)
+
+            this.lasttick = performance.now()
+
+            this.setupsource()
+        }
+        else{
+            
+        }
+    }
+
     setupsource(){
         this.clog(`setting up event source with interval ${QUERY_INTERVAL} ms`)        
 
@@ -172,7 +187,7 @@ class App extends SmartDomElement{
 
         this.source.addEventListener('message', function(e){
             let analysisinfo = JSON.parse(e.data)
-            if(analysisinfo == "tick"){
+            if(analysisinfo.kind == "tick"){
                 this.lasttick = performance.now()
             }else{
                 this.processanalysisinfo(analysisinfo)
@@ -188,6 +203,8 @@ class App extends SmartDomElement{
                 this.clog("connection closed")
             }
         }.bind(this), false)
+
+        this.lasttick = performance.now()
     }
 
     loadStudy(study){
@@ -254,6 +271,8 @@ class App extends SmartDomElement{
         )
 
         this.setupsource()        
+
+        setInterval(this.checksource.bind(this), QUERY_INTERVAL)
 
         this.loadStudy("Default")
 
