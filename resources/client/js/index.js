@@ -314,7 +314,7 @@ class App extends SmartDomElement{
                 case "dragenter":
                 case "dragover":
                     sev.ev.preventDefault()
-                    this.imageDiv.dfca().flww().bc("#777")
+                    this.imageDiv.dfca().flww().bc("#7f7")
                     break
                 case "dragleave":
                     this.imageDiv.bc("#777")
