@@ -441,9 +441,13 @@ class App extends SmartDomElement{
     }
 
     record(){
+        let bs = this.board.boardsize()
         let props = this.board.game.getcurrentnode().props()
 
-        let canvas = Canvas({width: this.board.boardsize(), height: this.board.boardsize()})
+        let canvas = Canvas({width: 2 * bs, height: bs})
+
+        canvas.fillStyle("#FFFFFF")
+        canvas.fillRect(Vect(0,0), Vect(2*bs,bs))
         
         canvas.ctx.drawImage(this.board.getCanvasByName("background").e, 0, 0)
         canvas.ctx.globalAlpha = 0.3
@@ -451,6 +455,8 @@ class App extends SmartDomElement{
         canvas.ctx.globalAlpha = 1
         canvas.ctx.drawImage(this.board.getCanvasByName("piece").e, 0, 0)
         canvas.ctx.drawImage(this.board.getCanvasByName("drawings").e, 0, 0)
+
+        canvas.ctx.drawImage(this.board.commentcanvas.e, bs, 0)
 
         this.gif.addFrame(canvas.e, {delay: props.delay || 1000})
     }

@@ -260,6 +260,25 @@ class Board_ extends SmartDomElement{
         }
     }
 
+    createCommentCanvas(){
+        let bs = this.boardsize()
+
+        this.commentcanvas = Canvas({width: bs, height: bs})
+
+        this.commentcanvas.ctx.globalAlpha = 1
+
+        this.commentcanvas.ctx.textBaseline = "top"
+        this.commentcanvas.ctx.fillStyle = "#000000"
+
+        this.commentfontsize = bs / 12
+        this.commentmargin = this.commentfontsize / 3
+
+        this.commentcanvas.ctx.font = `${this.commentfontsize}px serif`
+
+        let message = this.game.getcurrentnode().comment.split("#")[0]
+        if(message) this.commentcanvas.renderText(message, bs - 2 * this.commentmargin, this.commentfontsize * 1.1, this.commentmargin, this.commentmargin)
+    }
+
     draw(){
         this.getCanvasByName("dragpiece").clear()
 
@@ -268,6 +287,8 @@ class Board_ extends SmartDomElement{
         this.drawPieces()
 
         this.highlightDrawings()
+
+        this.createCommentCanvas()
     }
 
     tobegin(){
