@@ -1352,6 +1352,19 @@ class Canvas_ extends SmartDomElement{
             bimg.src = url
         })
     }
+
+    drawImageFromSrc(src, orig, sizeOpt){        
+        return new Promise((resolve, _)=>{
+            let img = Img()
+            img.ae("load", ()=>{         
+                let size = sizeOpt || Vect(img.naturalWidth, img.naturalHeight)       
+                this.ctx.drawImage(img.e, orig.x, orig.y, size.x, size.y)
+
+                resolve(true)
+            })
+            img.src = src
+        })
+    }
 }
 function Canvas(props){return new Canvas_(props)}
 

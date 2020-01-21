@@ -275,9 +275,8 @@ class App extends SmartDomElement{
 
     uploadimage(content, nameorig){
         let canvas = this.board.getCanvasByName("dragpiece")
-        let img = Img()                
-        img.e.onload = ()=>{                    
-            canvas.ctx.drawImage(img.e, 0, 0)        
+
+        canvas.drawImageFromSrc(content, Vect(0,0)).then(()=>{                    
             let offername = nameorig.replace(/\.JPG$|\.PNG$|\.GIF$/i, "")
             let name = window.prompt("Image name :", offername)
             IDB.put("image", {
@@ -292,8 +291,7 @@ class App extends SmartDomElement{
                     this.alert(`Storing image ${name} failed.`)
                 }
             })  
-        }
-        img.src = content                
+        })
     }
 
     dropImages(files){
@@ -496,16 +494,15 @@ class App extends SmartDomElement{
                 IDB.get("image", imageName).then(
                     result=>{
                         if(result.hasContent){
-                            let img = Img()
-                            img.e.addEventListener("load", ()=>{
-                                let ds = bs * drawing.thickness / 9
-                                let dm = ( bs - ds ) / 2
-                                canvas.ctx.globalAlpha = drawing.opacity / 9
-                                canvas.ctx.drawImage(img.e, bs + dm, dm, ds, ds)
+                            canvas.ctx.globalAlpha = drawing.opacity / 9
+
+                            let ds = bs * drawing.thickness / 9
+                            let dm = ( bs - ds ) / 2
+
+                            canvas.drawImageFromSrc(result.content.imgsrc, Vect(bs + dm, dm), Vect(ds, ds)).then(result=>{
                                 canvas.ctx.globalAlpha = 1
                                 finalizefunc()
-                            })
-                            img.src = result.content.imgsrc
+                            })                            
                         }else{
                             finalizefunc()
                         }
