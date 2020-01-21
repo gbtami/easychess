@@ -985,7 +985,7 @@ class EditableList_ extends SmartDomElement{
         this.selectedDivFontSize            = this.height * 0.9
         this.optionsDivBorderColor          = "#aaa"
         this.optionsDivBakcgroundColor      = "#ddd"        
-        this.optionsDivZIndex               = 10        
+        this.optionsDivZIndex               = 10 + ( this.props.forceZIndex ? this.props.forceZIndex : 0 )
         this.optionsDivBorderWidth          = this.height / 6
         this.optionsDivBorderStyle          = "solid"
         this.containerButtonMargin          = 2
@@ -1011,7 +1011,7 @@ class EditableList_ extends SmartDomElement{
         this.optionElementDivFontSize       = this.height * 0.8
         this.optionButtonLeftMargin         = 2
         this.optionCheckBoxSize             = this.height * 0.8
-        this.editDivZIndex                  = 20
+        this.editDivZIndex                  = 20 + ( this.props.forceZIndex ? this.props.forceZIndex : 0 )
         this.widgetFontSize                 = this.height * 0.9
         this.widgetButtonFontSize           = this.widgetFontSize * 0.8
         this.widgetPadding                  = 2        
@@ -1064,6 +1064,9 @@ class EditableList_ extends SmartDomElement{
 
         this.a(this.container)
 
+        if(this.props.forceSelected) this.state.selected = this.props.forceSelected
+        if(this.props.forceOptions) this.state.options = this.props.forceOptions
+
         this.buildOptions()
 
         this.state.rolled = !this.state.rolled
@@ -1076,6 +1079,8 @@ class EditableList_ extends SmartDomElement{
         this.state.rolled = !this.props.isContainer
         this.buildOptions()
         this.switchRoll()
+
+        if(this.props.changeCallback) this.props.changeCallback(this.state.selected, this.state.options)
     }
 
     delOption(option){
@@ -1084,6 +1089,8 @@ class EditableList_ extends SmartDomElement{
         else this.state.selected = null
         this.buildOptions()
         this.storeState()
+
+        if(this.props.changeCallback) this.props.changeCallback(this.state.selected, this.state.options)
     }
 
     handleEvent(sev){        
@@ -1112,6 +1119,8 @@ class EditableList_ extends SmartDomElement{
                     this.state.options.itoj(i,j)                    
                     this.buildOptions()
                     this.storeState()
+
+                    if(this.props.changeCallback) this.props.changeCallback(this.state.selected, this.state.options)
                     break
             }
         }
@@ -1147,10 +1156,15 @@ class EditableList_ extends SmartDomElement{
     }
 
     addOption(){
-        let value = window.prompt("Option Value :")
-        if(!value) value = ""        
-        let display = window.prompt("Option Display :")
-        if(!display) display = value        
+        let value, display
+        if(this.props.addOptionCallback){
+            [ value, display ] = this.props.addOptionCallback()
+        }else{
+            value = window.prompt("Option Value :")
+            if(!value) value = ""        
+            display = window.prompt("Option Display :")
+            if(!display) display = value        
+        }        
         let opt = this.findOptionByValue(value)
         if(opt){
             opt.display = display
@@ -1174,6 +1188,8 @@ class EditableList_ extends SmartDomElement{
         let path = this.path() + "/" + opt.value + "#enable"        
         storeLocal(path, {checked: true})
         this.buildOptions()
+
+        if(this.props.changeCallback) this.props.changeCallback(this.state.selected, this.state.options)
     }
 }
 function EditableList(props){return new EditableList_(props)}

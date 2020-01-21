@@ -100,7 +100,7 @@ class App extends SmartDomElement{
     buildMoves(){
         let lms = this.board.getlms(RICH).sort((a,b)=>a.san.localeCompare(b.san))                
         lms.sort((a,b)=>( ( b.gameMove - a.gameMove ) * 100 + ( b.weights[0] - a.weights[0] ) * 10 + ( b.weights[1] - a.weights[1] ) ))
-        this.movesDiv.hh(this.board.boardsize()).x().df().ame(
+        this.movesDiv.x().ame(div().hh(this.board.boardsize()).df().a(
             div().ovfys().a(
                 lms.map(lm=>div().ffm().dfc().a(                                
                     div().cp().bc(lm.gameMove ? "#ccf" : "#eee").fw(lm.gameMove ? "bold" : "normal")
@@ -119,7 +119,7 @@ class App extends SmartDomElement{
                 text: this.board.game.getcurrentnode().comment,
                 changeCallback: this.commentChanged.bind(this)
             }).fs(16).w(300)
-        )
+        ))
 
         this.commentTextArea.focus()
     }
@@ -155,7 +155,7 @@ class App extends SmartDomElement{
         this.treeDiv.x().a(this.buildTree(null, null, 0, 10))
     }
 
-    storeDefault(){
+    storeDefault(){        
         this.storeStudy("Default", this.board.game.serialize())
     }
 
@@ -179,6 +179,7 @@ class App extends SmartDomElement{
 
         this.doLater("buildMoves", 500)
         this.doLater("showTree", 500)
+        this.doLater("buildAnimsDiv", 500)
 
         this.storeDefault()
     }
@@ -327,6 +328,79 @@ class App extends SmartDomElement{
         }
     }
 
+    addAnimationCallback(){                
+        let [ value, display ] = [ this.board.game.currentnodeid + "_" + UID() , "Animation " + this.board.game.line() ]
+        display = window.prompt("Animation name : ", display)
+        this.alert(`Added animation ${display} under id ${value}.`)
+        return [ value, display ]
+    }
+
+    animsChanged(selected, options){        
+        let g = this.board.game
+        g.animations = options
+        g.selectedAnimation = selected
+        this.buildAnimsDiv()
+        this.doLater("storeDefault", 1000)
+    }
+
+    addSelAnimationCallback(){
+        return [ this.board.game.currentnodeid, "root " + this.board.game.line() ]
+    }
+
+    selAnimChanged(selected, options){
+        let g = this.board.game
+        g.animationDescriptors[g.selectedAnimation.value] = {
+            selected: selected,
+            list: options
+        }                                
+        try{
+            this.board.setfromnode(g.gamenodes[selected.value])
+        }catch(err){
+            this.positionchanged()
+        }
+    }
+
+    buildAnimsDiv(){
+        let g = this.board.game
+
+        let selanim = g.selectedAnimation
+        let anims = g.animations
+
+        this.animsEditableList = EditableList({
+            id: "animseditablelist",
+            changeCallback: this.animsChanged.bind(this),
+            addOptionCallback: this.addAnimationCallback.bind(this),
+            forceSelected: selanim,
+            forceOptions: anims,
+            width: 500,
+            forceZIndex: 20
+        }).mar(5)
+
+        this.animsDiv.x().a(
+            this.animsEditableList
+        )
+
+        if(selanim){
+            let animdesc = this.board.game.animationDescriptors[selanim.value]            
+
+            this.selAnimEditableList = EditableList({
+                id: "selanimeditablelist",
+                changeCallback: this.selAnimChanged.bind(this),
+                addOptionCallback: this.addSelAnimationCallback.bind(this),
+                forceSelected: animdesc ? animdesc.selected : null,
+                forceOptions: animdesc ? animdesc.list : [],
+                width: 500,
+                forceZIndex: 10
+            }).mar(10)
+
+            this.animsDiv.a(
+                this.selAnimEditableList
+            )
+        }
+
+        this.animsDiv.ame()
+    }
+
     constructor(props){
         super("div", props)
 
@@ -358,11 +432,13 @@ class App extends SmartDomElement{
             this.buildMoves()
         }.bind(this)
 
+        this.animsDiv = div()
+
         this.tabs = TabPane({id: "maintabpane"}).setTabs([
             Tab({id: "moves", caption: "Moves", content: this.movesDiv}),
             Tab({id: "tree", caption: "Tree", content: this.treeDiv}),
             Tab({id: "images", caption: "Images", content: this.imageDiv}),
-            Tab({id: "anims", caption: "Animations", content: div().html("ANIMATIONS")})
+            Tab({id: "anims", caption: "Animations", content: this.animsDiv})
         ])
 
         this.mainPane.headDiv.a(
