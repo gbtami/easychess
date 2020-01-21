@@ -1129,11 +1129,13 @@ class EditableList_ extends SmartDomElement{
     buildOptions(){
         if(!this.state.options) this.state.options = []
 
-        if(!this.state.selected && this.state.options.length) this.state.selected = this.state.options[0]
+        if((!this.state.selected) && this.state.options.length) this.state.selected = this.state.options[0]
+
+        if(!this.state.options.length) this.state.selected = null
         
         this.optionsDiv.x().ame(this.state.options.map(option=>
             OptionElement({option: option})
-        ))        
+        ))       
 
         if(this.props.isContainer && (!this.props.showSelected)){
             this.selectedDiv.html(this.props.label ? this.props.label : "")
