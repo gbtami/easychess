@@ -390,7 +390,8 @@ class App extends SmartDomElement{
                 forceSelected: animdesc ? animdesc.selected : null,
                 forceOptions: animdesc ? animdesc.list : [],
                 width: 500,
-                forceZIndex: 10
+                forceZIndex: 10,
+                dontRollOnSelect: true
             }).mar(10)
 
             this.animsDiv.a(

@@ -1078,7 +1078,7 @@ class EditableList_ extends SmartDomElement{
         this.state.selected = option
         this.state.rolled = !this.props.isContainer
         this.buildOptions()
-        this.switchRoll()
+        if(!this.props.dontRollOnSelect) this.switchRoll()
 
         if(this.props.changeCallback) this.props.changeCallback(this.state.selected, this.state.options)
     }
