@@ -41,6 +41,7 @@ app.get('/auth/lichess/callback',
 )
 
 const { readJson } = require('../utils/rwjson')
+const { update } = require('../utils/octokit')
 const sse = require('./sse')
 const { AbstractEngine } = require('../shared/js/chessboard')
 const { fromchunks } = require('../utils/firebase')
@@ -51,7 +52,7 @@ const MAX_SSE_CONNECTIONS = 100
 
 const QUERY_INTERVAL = 3000
 
-const AUTH_TOPICS = ["bucket:put", "bucket:get"]
+const AUTH_TOPICS = ["bucket:put", "bucket:get", "git:put"]
 
 function IS_DEV(){
     return !!process.env.EASYCHESS_DEV
@@ -159,6 +160,15 @@ const HANDLERS = {
             }else{
                 apisend({content: contents.toString()}, null, res)
             }            
+        })
+      },
+      "git:put":function(res, payload){    
+        let filename = payload.filename || "backup/backup.txt"    
+        let content = payload.content
+        clog(`git put ${filename} content size ${content.length}`)
+        update(filename, content, (result)=>{
+          if(result.error) apisend({}, result.status, res)
+          else apisend(result.status, null, res)
         })
       }
 }  

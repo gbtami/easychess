@@ -627,6 +627,21 @@ class App extends SmartDomElement{
         })
     }
 
+    backupGit(){
+        this.createZippedBackup().then(content=>{
+            api("git:put", {
+                content: content,
+                password: this.askPass()
+            }, response=> {
+                if(response.ok){
+                    this.alert(`Uploaded to git.`)
+                }else{
+                    this.alert(`${response.error}`)
+                }
+            })
+        })
+    }
+
     backupDropped(ev){
         let file = ev.dataTransfer.files[0]
         let reader = new FileReader()
@@ -692,6 +707,7 @@ class App extends SmartDomElement{
                 Button("Backup Remote", this.backupRemote.bind(this)),
                 Button("Restore Remote", this.restoreRemote.bind(this)),
                 Button("Backup Local", this.backupLocal.bind(this)),
+                Button("Backup Git", this.backupGit.bind(this)),
             ),            
             this.backupTextArea = TextAreaInput().mar(10).w(this.board.boardsize()).h(this.board.boardsize())
                 .ae("paste", this.backupPasted.bind(this)).dropLogic(this.backupDropped.bind(this))
