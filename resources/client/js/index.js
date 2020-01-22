@@ -563,21 +563,33 @@ class App extends SmartDomElement{
 
     createBackupBlob(){
         return {
-            localStorageEntries: Object.entries(localStorage)
+            localStorageEntries: Object.entries(localStorage).filter(entry=> entry[0]!="PASSWORD")
         }
     }
 
-    showBackup(){
+    createZippedBackup(){
         let blob = this.createBackupBlob()
         let blobstr = JSON.stringify(blob)
 
-        createZip(blobstr).then(
+        return createZip(blobstr)
+    }
+
+    askPass(){
+        let storedPass = localStorage.getItem("PASSWORD")
+        if(storedPass) return storedPass
+        let password = window.prompt("Password : ")
+        localStorage.setItem("PASSWORD", password)
+        return password
+    }
+
+    showBackup(){
+        this.createZippedBackup().then(
             content=>this.backupTextArea.setCopy(content)
         )
     }
 
     setFromBackup(content){
-        let blobstr = unZip(content).then(blobstr=>{
+        unZip(content).then(blobstr=>{
             let blob = JSON.parse(blobstr)
             let i = 0
             for(let entry of blob.localStorageEntries){
@@ -593,6 +605,36 @@ class App extends SmartDomElement{
         let content = ev.clipboardData.getData('Text')        
         this.backupTextArea.setCopy(content)
         this.setFromBackup(content)
+    }
+
+    setPassword(){
+        localStorage.removeItem("PASSWORD")
+        this.askPass()
+    }
+
+    backupRemote(){
+        this.createZippedBackup().then(content=>
+            api("bucket:put", {
+                content: content,
+                password: this.askPass()
+            }, response=> {
+                if(response.ok){
+                    this.alert(`Backup done. Size ${response.apiResponse.size}`)
+                }else{
+                    this.alert(`Backup failed. ${response.error}`)
+                }
+            })
+        )
+    }
+
+    restoreRemote(){
+        api("bucket:get", {
+            password: this.askPass()
+        }, response=>{
+            if(response.ok){
+                this.setFromBackup(response.content)
+            }
+        })
     }
 
     constructor(props){
@@ -618,8 +660,9 @@ class App extends SmartDomElement{
         this.treeDiv = div()
         this.imageDiv = div({ev: "dragenter dragover dragleave drop", do: "dragimage"}).bc("#999")
         this.authDiv = div().a(
-            div().mar(5).a(
-                Button("Login with lichess", this.loginWithLichess.bind(this))                
+            div().mar(5).a(                
+                Button("Login with lichess", this.loginWithLichess.bind(this)),
+                Button("Set Password", this.setPassword.bind(this))                
             )
         )
 
@@ -642,6 +685,8 @@ class App extends SmartDomElement{
         this.backupDiv = div().a(
             div().mar(5).a(
                 Button("Show", this.showBackup.bind(this)),
+                Button("Backup Remote", this.backupRemote.bind(this)),
+                Button("Restore Remote", this.restoreRemote.bind(this)),
             ),            
             this.backupTextArea = TextAreaInput().mar(10).w(this.board.boardsize()).h(this.board.boardsize())
                 .ae("paste", this.backupPasted.bind(this))

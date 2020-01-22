@@ -3,6 +3,7 @@ var passport = require('passport');
 var Strategy = require('passport-lichess').Strategy;
 const path = require('path')
 const spawn = require('child_process').spawn
+const fs = require('fs')
 
 passport.use(new Strategy({
         clientID: process.env.LICHESS_CLIENT_ID,
@@ -50,7 +51,7 @@ const MAX_SSE_CONNECTIONS = 100
 
 const QUERY_INTERVAL = 3000
 
-const AUTH_TOPICS = []
+const AUTH_TOPICS = ["bucket:put", "bucket:get"]
 
 function IS_DEV(){
     return !!process.env.EASYCHESS_DEV
@@ -80,8 +81,8 @@ admin.initializeApp({
 
 bucket = admin.storage().bucket()
 
-bucket.upload(path.join(__rootdirname, "ReadMe.md"), {destination: "ReadMe.md"}, (err, _, apiResoponse)=>{
-    console.log(err ? "bucket test failed" : `bucket test ok, uploaded ReadMe.md, size ${apiResoponse.size}`)
+bucket.upload(path.join(__rootdirname, "ReadMe.md"), {destination: "ReadMe.md"}, (err, _, apiResponse)=>{
+    console.log(err ? "bucket test failed" : `bucket test ok, uploaded ReadMe.md, size ${apiResponse.size}`)
 })    
 
 const STOCKFISH_PATH = path.join(__dirname, "bin/stockfish")
@@ -133,20 +134,47 @@ const HANDLERS = {
       engine.setcommand("stop", null)
       apisend(`engine:stop issued`, null, res)
     },
+    "bucket:put":function(res, payload){    
+        let filename = payload.filename || "backup"    
+        let content = payload.content
+        clog(`put bucket ${filename} content size ${content.length}`)
+        fs.writeFile("temp.txt", content, function(err) {
+            clog("written file locally")
+            bucket.upload("temp.txt", {destination: filename}, (err, _, apiResponse)=>{
+                clog(`upload result ${err} ${apiResponse}`)
+                apisend({apiResponse: apiResponse}, err, res)
+            })    
+        })
+      },
+      "bucket:get":function(res, payload){    
+        if(!bucket){
+            apisend({}, `Error: No bucket.`, res)          
+            return
+        }
+        let filename = payload.filename || "backup"
+        clog("dowloading", filename)
+        bucket.file(filename).download((err, contents)=>{
+            if(err){
+                apisend({}, `Error: Not found.`, res)          
+            }else{
+                apisend({content: contents.toString()}, null, res)
+            }            
+        })
+      }
 }  
 
 app.use(express.json({limit: '100MB'}))
 
 app.post('/api', (req, res) => {                
     let body = req.body
-
-    clog(body)
   
     let topic = body.topic  
     let payload = body.payload
+
+    clog(topic)
   
     if(AUTH_TOPICS.includes(topic)){
-        if(payload.pass != process.env.PASS){
+        if(payload.password != process.env.PASSWORD){
             apisend({}, "Error: Not authorized.", res)
             clog("not authorized")
             return
