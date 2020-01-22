@@ -203,7 +203,8 @@ app.post('/api', (req, res) => {
 const PROPS = {    
     IS_DEV: IS_DEV(),
     QUERY_INTERVAL: QUERY_INTERVAL,
-    imagestore: getFiles(path.join(__rootdirname, "resources/client/img/imagestore"))
+    imagestore: getFiles(path.join(__rootdirname, "resources/client/img/imagestore")),
+    readme: fs.readFileSync(path.join(__rootdirname, "ReadMe.md")).toString()
 }
 
 class ServerEngine extends AbstractEngine{

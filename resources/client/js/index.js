@@ -754,7 +754,8 @@ class App extends SmartDomElement{
             Tab({id: "images", caption: "Images", content: this.imageDiv}),
             Tab({id: "anims", caption: "Animations", content: this.animsDiv}),
             Tab({id: "backup", caption: "Backup", content: this.backupDiv}),
-            Tab({id: "auth", caption: username, content: this.authDiv})
+            Tab({id: "auth", caption: username, content: this.authDiv}),
+            Tab({id: "about", caption: "About", content: div().mar(5).marl(20).a(div().html(md2html(PROPS.readme)))})
         ])
 
         this.mainPane.headDiv.a(

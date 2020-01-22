@@ -1,3 +1,9 @@
+let markdownconverter = null
+
+try{
+    markdownconverter = new showdown.Converter()
+}catch(err){}
+
 function IS_DEV(){
     if(typeof PROPS.IS_DEV != "undefined") return PROPS.IS_DEV
     return !!document.location.host.match(/localhost/)
@@ -251,4 +257,10 @@ function blobToDataURL(blob) {
         fr.onload = ev => resolve(ev.target.result)
         fr.readAsDataURL(blob)
     })
+}
+
+function md2html(content){
+    let html = markdownconverter.makeHtml(content)
+    html = html.replace(/<a href=/g, `<a rel="noopener noreferrer" target="_blank" href=`)
+    return html
 }

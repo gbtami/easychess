@@ -1,5 +1,6 @@
 {
     "dev": [
+        "resources/client/cdn/showdown.min.js",
         "resources/client/cdn/jszip.js",
         "resources/client/cdn/gif.js",
         "resources/client/js/utils.js",
@@ -9,6 +10,7 @@
         "resources/client/js/indexeddb.js"
     ],
     "prod": [
+        "resources/client/cdn/showdown.min.js",
         "resources/client/cdn/jszip.min.js",
         "resources/client/cdn/gif.js",
         "resources/client/js/utils.js",
