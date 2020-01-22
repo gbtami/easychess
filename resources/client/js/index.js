@@ -2,6 +2,11 @@ const STOCKFISH_JS_PATH = "resources/client/cdn/stockfish.wasm.js"
 
 const QUERY_INTERVAL = PROPS.QUERY_INTERVAL || 3000
 
+const BACKUP_STORAGES = [
+    "engine",
+    "study"
+]
+
 class LocalEngine extends AbstractEngine{
     constructor(sendanalysisinfo){
         super(sendanalysisinfo)
@@ -546,16 +551,23 @@ class App extends SmartDomElement{
     }
 
     createBackupBlob(){
-        return {
-            localStorageEntries: Object.entries(localStorage).filter(entry=> entry[0]!="PASSWORD")
-        }
+        return new Promise((resolve)=>{
+            let obj = {
+                localStorageEntries: Object.entries(localStorage).filter(entry=> entry[0]!="PASSWORD")
+            }
+            IDB.getAlls(BACKUP_STORAGES).then(result=>{
+                obj.indexedDB = result
+                resolve(obj)
+            })
+        })
     }
 
     createZippedBackup(){
-        let blob = this.createBackupBlob()
-        let blobstr = JSON.stringify(blob)
-
-        return createZip(blobstr)
+        return new Promise(resolve=>{
+            this.createBackupBlob().then(blob=>{
+                resolve(createZip(JSON.stringify(blob)))
+            })
+        })
     }
 
     askPass(){
@@ -580,7 +592,19 @@ class App extends SmartDomElement{
                 localStorage.setItem(entry[0], entry[1])
                 i++
             }
-            this.alert(`Restored ${i} entries.`)
+            let si = 0
+            let ki = 0                
+            for(let store in blob.indexedDB){                                
+                for(let obj of blob.indexedDB[store].content){                    
+                    console.log(store, obj);
+                    (async function(){
+                        await IDB.put(store, obj)
+                    })()
+                    ki++
+                }
+                si ++
+            }
+            this.alert(`Restored ${i} entries, ${si} stores, ${ki} objects.`)
             setTimeout(()=>document.location.reload(), 4000)
         })
     }
@@ -688,6 +712,25 @@ class App extends SmartDomElement{
         }))
     }
 
+    clean(){
+        localStorage.clear()
+        indexedDB.deleteDatabase(DATABASE_NAME)
+        this.alert("Cleared localStorage and indexedDB.")
+        setTimeout(()=>document.location.reload(), 3000)
+    }
+
+    commandChanged(ev){
+        if( (ev.type == "keyup") && (ev.keyCode == 13) ){
+            let command = ev.target.value
+            this.commandInput.setValue("")
+            switch(command){
+                case "clean":
+                    this.clean()
+                    break
+            }
+        }
+    }
+
     constructor(props){
         super("div", props)
 
@@ -770,7 +813,8 @@ class App extends SmartDomElement{
                 Button("L", this.board.del.bind(this.board)).ff("lichess").bc("#faa"),
                 CheckBoxInput({id: "uselocalstockfishcheckbox", settings: this.settings}),
                 this.gobutton = Button("Go", this.go.bind(this)).bc("#afa"),
-                this.stopbutton = Button("Stop", this.stop.bind(this)).bc("#eee")
+                this.stopbutton = Button("Stop", this.stop.bind(this)).bc("#eee"),
+                this.commandInput = TextInput().w(80).ae("keyup", this.commandChanged.bind(this))
             ),
             this.gametext = TextAreaInput().w(this.board.boardsize() - 6).h(120)
         )

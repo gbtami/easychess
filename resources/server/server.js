@@ -154,7 +154,7 @@ const HANDLERS = {
             return
         }
         let filename = payload.filename || "backup"
-        clog("dowloading", filename)
+        clog("downloading", filename)
         bucket.file(filename).download((err, contents)=>{
             if(err){
                 apisend({}, `Error: Not found.`, res)          
