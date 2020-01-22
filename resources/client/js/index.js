@@ -654,6 +654,22 @@ class App extends SmartDomElement{
         reader.readAsText(file)
     }
 
+    restoreGit(){
+        fetch("https://raw.githubusercontent.com/easychessanimations/easychess/master/backup/backup.txt").then(
+            (response)=>response.text().then(
+                content => {
+                    this.setFromBackup(content)
+                },
+                err => {                                        
+                    this.alert("Error: Response content could not be obtained.")
+                }
+            ),
+            err => {                
+                this.alert("Error: Fetch failed.")
+            }
+        )
+    }
+
     constructor(props){
         super("div", props)
 
@@ -708,6 +724,7 @@ class App extends SmartDomElement{
                 Button("Restore Remote", this.restoreRemote.bind(this)),
                 Button("Backup Local", this.backupLocal.bind(this)),
                 Button("Backup Git", this.backupGit.bind(this)),
+                Button("Restore Git", this.restoreGit.bind(this)),
             ),            
             this.backupTextArea = TextAreaInput().mar(10).w(this.board.boardsize()).h(this.board.boardsize())
                 .ae("paste", this.backupPasted.bind(this)).dropLogic(this.backupDropped.bind(this))
