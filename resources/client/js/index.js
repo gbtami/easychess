@@ -306,24 +306,8 @@ class App extends SmartDomElement{
         reader.readAsDataURL(file)                
     }
 
-    handleEvent(sev){
-        if(sev.do == "dragimage"){
-            switch(sev.kind){
-                case "dragenter":
-                case "dragover":
-                    sev.ev.preventDefault()
-                    this.imageDiv.dfca().flww().bc("#7f7")
-                    break
-                case "dragleave":
-                    this.imageDiv.bc("#777")
-                    break
-                case "drop":
-                    sev.ev.preventDefault()                    
-                    this.imageDiv.bc("#777")
-                    this.dropImages(sev.ev.dataTransfer.files)
-                    break
-            }
-        }
+    imageDropped(ev){
+        this.dropImages(ev.dataTransfer.files)
     }
 
     addAnimationCallback(){                
@@ -637,6 +621,24 @@ class App extends SmartDomElement{
         })
     }
 
+    backupLocal(){
+        this.createZippedBackup().then(content=>{
+            downloadcontent(content)
+        })
+    }
+
+    backupDropped(ev){
+        let file = ev.dataTransfer.files[0]
+        let reader = new FileReader()
+
+        reader.onload = event=> {          
+            let content = event.target.result            
+            this.setFromBackup(content)
+        }
+
+        reader.readAsText(file)
+    }
+
     constructor(props){
         super("div", props)
 
@@ -658,7 +660,9 @@ class App extends SmartDomElement{
 
         this.movesDiv = div()
         this.treeDiv = div()
-        this.imageDiv = div({ev: "dragenter dragover dragleave drop", do: "dragimage"}).bc("#999")
+
+        this.imageDiv = div().dfca().flww().dropLogic(this.imageDropped.bind(this))
+
         this.authDiv = div().a(
             div().mar(5).a(                
                 Button("Login with lichess", this.loginWithLichess.bind(this)),
@@ -687,9 +691,10 @@ class App extends SmartDomElement{
                 Button("Show", this.showBackup.bind(this)),
                 Button("Backup Remote", this.backupRemote.bind(this)),
                 Button("Restore Remote", this.restoreRemote.bind(this)),
+                Button("Backup Local", this.backupLocal.bind(this)),
             ),            
             this.backupTextArea = TextAreaInput().mar(10).w(this.board.boardsize()).h(this.board.boardsize())
-                .ae("paste", this.backupPasted.bind(this))
+                .ae("paste", this.backupPasted.bind(this)).dropLogic(this.backupDropped.bind(this))
         )
 
         this.tabs = TabPane({id: "maintabpane"}).setTabs([

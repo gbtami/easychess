@@ -16,6 +16,33 @@ class SmartDomEvent{
 }
 
 class SmartDomElement{
+    dropHandler(ev){
+        switch(ev.type){
+            case "dragenter":
+            case "dragover":
+                ev.preventDefault()
+                this.bc(this.dragbc)
+                break
+            case "dragleave":
+                this.bc(this.normalbc)
+                break
+            case "drop":
+                ev.preventDefault()                    
+                this.bc(this.normalbc)
+                this.dropCallback(ev)
+                break
+        }
+    }
+
+    dropLogic(callback, normalbc, dragbc){
+        this.normalbc = normalbc || "#777"        
+        this.dragbc = dragbc || "#7f7"
+        this.dropCallback = callback        
+        this.bc(normalbc)
+        this.ae("dragenter dragover dragleave drop", this.dropHandler.bind(this))
+        return this
+    }
+    
     constructor(tagName, propsOpt){
         this.tagName = tagName
 

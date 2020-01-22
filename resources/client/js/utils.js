@@ -230,3 +230,17 @@ function unZip(content, nameOpt){
             unzip.file(name).async("text").then(content=> resolve(content)))
     })        
 }
+
+function downloadcontent(content, name){
+    let file = new Blob([content])
+    let a = document.createElement("a")
+    let url = URL.createObjectURL(file)
+    a.href = url
+    a.download = name || "download.txt"
+    document.body.appendChild(a)        
+    a.click()
+    setTimeout(function(){
+        document.body.removeChild(a)
+        window.URL.revokeObjectURL(url)
+    }, 0)
+}
