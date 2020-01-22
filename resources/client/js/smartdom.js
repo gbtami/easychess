@@ -383,6 +383,12 @@ class TextAreaInput_ extends SmartDomElement{
         super("textarea", props)
     }
 
+    setCopy(content){
+        this.setValue(content).focus().select()
+        document.execCommand("copy")
+        setTimeout(()=>this.focus().select(), 50)
+    }
+
     init(){        
         this.ae("keyup", this.textChanged.bind(this))
         this.ae("change", this.textChanged.bind(this))

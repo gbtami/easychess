@@ -562,7 +562,9 @@ class App extends SmartDomElement{
     }
 
     createBackupBlob(){
-        return Object.entries(localStorage)
+        return {
+            localStorageEntries: Object.entries(localStorage)
+        }
     }
 
     showBackup(){
@@ -570,8 +572,27 @@ class App extends SmartDomElement{
         let blobstr = JSON.stringify(blob)
 
         createZip(blobstr).then(
-            content=>this.backupTextArea.setValue(content)
+            content=>this.backupTextArea.setCopy(content)
         )
+    }
+
+    setFromBackup(content){
+        let blobstr = unZip(content).then(blobstr=>{
+            let blob = JSON.parse(blobstr)
+            let i = 0
+            for(let entry of blob.localStorageEntries){
+                localStorage.setItem(entry[0], entry[1])
+                i++
+            }
+            this.alert(`Restored ${i} entries.`)
+            setTimeout(()=>document.location.reload(), 4000)
+        })
+    }
+
+    backupPasted(ev){
+        let content = ev.clipboardData.getData('Text')        
+        this.backupTextArea.setCopy(content)
+        this.setFromBackup(content)
     }
 
     constructor(props){
@@ -623,6 +644,7 @@ class App extends SmartDomElement{
                 Button("Show", this.showBackup.bind(this)),
             ),            
             this.backupTextArea = TextAreaInput().mar(10).w(this.board.boardsize()).h(this.board.boardsize())
+                .ae("paste", this.backupPasted.bind(this))
         )
 
         this.tabs = TabPane({id: "maintabpane"}).setTabs([

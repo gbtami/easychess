@@ -219,3 +219,14 @@ function createZip(content, nameOpt){
         }            
     })
 }
+
+function unZip(content, nameOpt){
+    let name = nameOpt || "backup"
+    
+    let unzip = new JSZip()            
+
+    return new Promise((resolve, reject)=>{
+        unzip.loadAsync(content, {base64: true}).then(unzip=>
+            unzip.file(name).async("text").then(content=> resolve(content)))
+    })        
+}
