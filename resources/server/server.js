@@ -4,6 +4,7 @@ var Strategy = require('passport-lichess').Strategy;
 const path = require('path')
 const spawn = require('child_process').spawn
 const fs = require('fs')
+const { getFiles } = require('../utils/fileutils')
 
 passport.use(new Strategy({
         clientID: process.env.LICHESS_CLIENT_ID,
@@ -201,7 +202,8 @@ app.post('/api', (req, res) => {
 
 const PROPS = {    
     IS_DEV: IS_DEV(),
-    QUERY_INTERVAL: QUERY_INTERVAL
+    QUERY_INTERVAL: QUERY_INTERVAL,
+    imagestore: getFiles(path.join(__rootdirname, "resources/client/img/imagestore"))
 }
 
 class ServerEngine extends AbstractEngine{

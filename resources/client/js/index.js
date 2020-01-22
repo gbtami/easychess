@@ -670,6 +670,24 @@ class App extends SmartDomElement{
         )
     }
 
+    loadImagestore(){
+        PROPS.imagestore.forEach(name=>IDB.get("image", name.split(".")[0]).then(result=>{
+            if(!result.hasContent){
+                fetch(`/resources/client/img/imagestore/${name}`)
+                    .then(response=>response.blob())
+                    .then(blob=>blobToDataURL(blob))                    
+                    .then(dataUrl=>{
+                        this.clog(`storing fetched image ${name}`)
+                        IDB.put("image", {
+                            name: name.split(".")[0],
+                            imgsrc: dataUrl
+                        })
+                        this.doLater("showImages", 3000)
+                    })
+            }
+        }))
+    }
+
     constructor(props){
         super("div", props)
 
@@ -771,6 +789,8 @@ class App extends SmartDomElement{
         this.positionchanged()
 
         this.showImages()
+
+        this.loadImagestore()
     }
 
     initgif(){
@@ -792,6 +812,7 @@ initDb().then(
         document.getElementById('root').appendChild(app.e)
 
         app.clog(app)
+        app.clog(PROPS)
     },
     err => {
         console.log(err.content)

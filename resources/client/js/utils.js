@@ -244,3 +244,11 @@ function downloadcontent(content, name){
         window.URL.revokeObjectURL(url)
     }, 0)
 }
+
+function blobToDataURL(blob) {
+    return new Promise((resolve, _)=>{
+        let fr = new FileReader()
+        fr.onload = ev => resolve(ev.target.result)
+        fr.readAsDataURL(blob)
+    })
+}
