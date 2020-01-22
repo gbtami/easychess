@@ -557,6 +557,10 @@ class App extends SmartDomElement{
         return false
     }
 
+    loginWithLichess(){
+        document.location.href = "/auth/lichess"
+    }
+
     constructor(props){
         super("div", props)
 
@@ -579,6 +583,11 @@ class App extends SmartDomElement{
         this.movesDiv = div()
         this.treeDiv = div()
         this.imageDiv = div({ev: "dragenter dragover dragleave drop", do: "dragimage"}).bc("#999")
+        this.authDiv = div().a(
+            div().mar(5).a(
+                Button("Login with lichess", this.loginWithLichess.bind(this))                
+            )
+        )
 
         this.imageDiv.resize = function(width, height){                        
             this.w(width - 20).mih(height - 20)
@@ -590,11 +599,18 @@ class App extends SmartDomElement{
 
         this.animsDiv = div()
 
+        let username = "__ Auth __"
+
+        if(PROPS.USER){
+            username = PROPS.USER.username
+        }
+
         this.tabs = TabPane({id: "maintabpane"}).setTabs([
             Tab({id: "moves", caption: "Moves", content: this.movesDiv}),
             Tab({id: "tree", caption: "Tree", content: this.treeDiv}),
             Tab({id: "images", caption: "Images", content: this.imageDiv}),
-            Tab({id: "anims", caption: "Animations", content: this.animsDiv})
+            Tab({id: "anims", caption: "Animations", content: this.animsDiv}),
+            Tab({id: "auth", caption: username, content: this.authDiv})
         ])
 
         this.mainPane.headDiv.a(

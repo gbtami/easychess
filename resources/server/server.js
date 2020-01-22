@@ -1,13 +1,48 @@
 const express = require('express')
+var passport = require('passport');
+var Strategy = require('passport-lichess').Strategy;
 const path = require('path')
 const spawn = require('child_process').spawn
+
+passport.use(new Strategy({
+        clientID: process.env.LICHESS_CLIENT_ID,
+        clientSecret: process.env.LICHESS_CLIENT_SECRET,
+        callbackURL: '/auth/lichess/callback'
+    },
+    function(accessToken, refreshToken, profile, cb) {
+    return cb(null, profile)
+}))
+
+passport.serializeUser(function(user, cb) {
+    cb(null, user)
+})
+  
+passport.deserializeUser(function(obj, cb) {
+    cb(null, obj)
+})
+
+const app = express()
+
+app.use(require('cookie-parser')())
+app.use(require('body-parser').urlencoded({ extended: true }))
+app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }))
+app.use(passport.initialize())
+app.use(passport.session())
+
+app.get('/auth/lichess',
+  passport.authenticate('lichess'))
+
+app.get('/auth/lichess/callback', 
+    passport.authenticate('lichess', { failureRedirect: '/login' }),
+        function(req, res) {
+            res.redirect('/?login=ok')
+        }
+)
 
 const { readJson } = require('../utils/rwjson')
 const sse = require('./sse')
 const { AbstractEngine } = require('../shared/js/chessboard')
 const { fromchunks } = require('../utils/firebase')
-
-const app = express()
 
 const PORT = process.env.PORT || 3000
 
@@ -126,7 +161,7 @@ app.post('/api', (req, res) => {
     }  
 })
 
-const PROPS = {
+const PROPS = {    
     IS_DEV: IS_DEV(),
     QUERY_INTERVAL: QUERY_INTERVAL
 }
@@ -179,7 +214,7 @@ app.get('/', (req, res) => res.send(`
         <link rel="icon" href="/resources/client/favicon.ico" />
 
         <script>
-        const PROPS = ${JSON.stringify(PROPS, null, 2)}
+        const PROPS = ${JSON.stringify({...PROPS, ...{USER: req.user}}, null, 2)}
         </script>
 
         ${loadStyleSheets}
