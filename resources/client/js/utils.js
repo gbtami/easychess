@@ -203,3 +203,19 @@ function getelse(obj, key, defaultvalue){
     if(key in obj) return obj[key]
     return defaultvalue
 }
+
+function createZip(content, nameOpt){
+    let name = nameOpt || "backup"
+
+    let zip = new JSZip()
+
+    zip.file(name, content)
+
+    return zip.generateAsync({
+        type: "base64",
+        compression: "DEFLATE",
+        compressionOptions: {
+            level: 9
+        }            
+    })
+}

@@ -561,6 +561,19 @@ class App extends SmartDomElement{
         document.location.href = "/auth/lichess"
     }
 
+    createBackupBlob(){
+        return Object.entries(localStorage)
+    }
+
+    showBackup(){
+        let blob = this.createBackupBlob()
+        let blobstr = JSON.stringify(blob)
+
+        createZip(blobstr).then(
+            content=>this.backupTextArea.setValue(content)
+        )
+    }
+
     constructor(props){
         super("div", props)
 
@@ -605,11 +618,19 @@ class App extends SmartDomElement{
             username = PROPS.USER.username
         }
 
+        this.backupDiv = div().a(
+            div().mar(5).a(
+                Button("Show", this.showBackup.bind(this)),
+            ),            
+            this.backupTextArea = TextAreaInput().mar(10).w(this.board.boardsize()).h(this.board.boardsize())
+        )
+
         this.tabs = TabPane({id: "maintabpane"}).setTabs([
             Tab({id: "moves", caption: "Moves", content: this.movesDiv}),
             Tab({id: "tree", caption: "Tree", content: this.treeDiv}),
             Tab({id: "images", caption: "Images", content: this.imageDiv}),
             Tab({id: "anims", caption: "Animations", content: this.animsDiv}),
+            Tab({id: "backup", caption: "Backup", content: this.backupDiv}),
             Tab({id: "auth", caption: username, content: this.authDiv})
         ])
 
