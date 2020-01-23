@@ -443,7 +443,7 @@ class App extends SmartDomElement{
     }
 
     record(){
-        return new Promise((resolve, reject)=>{
+        return P((resolve, reject)=>{
             let bs = this.board.boardsize()
             let props = this.board.game.getcurrentnode().props()
 
@@ -551,7 +551,7 @@ class App extends SmartDomElement{
     }
 
     createBackupBlob(){
-        return new Promise((resolve)=>{
+        return P((resolve)=>{
             let obj = {
                 localStorageEntries: Object.entries(localStorage).filter(entry=> entry[0]!="PASSWORD")
             }
@@ -563,7 +563,7 @@ class App extends SmartDomElement{
     }
 
     createZippedBackup(){
-        return new Promise(resolve=>{
+        return P(resolve=>{
             this.createBackupBlob().then(blob=>{
                 resolve(createZip(JSON.stringify(blob)))
             })
@@ -772,7 +772,7 @@ class App extends SmartDomElement{
 
         this.animsDiv = div()
 
-        let username = "__ Auth __"
+        let username = "_ Auth _"
 
         if(PROPS.USER){
             username = PROPS.USER.username
@@ -796,14 +796,17 @@ class App extends SmartDomElement{
             Tab({id: "tree", caption: "Tree", content: this.treeDiv}),
             Tab({id: "images", caption: "Images", content: this.imageDiv}),
             Tab({id: "anims", caption: "Animations", content: this.animsDiv}),
-            Tab({id: "backup", caption: "Backup", content: this.backupDiv}),
+            Tab({id: "backup", caption: "Backup", content: this.backupDiv}),            
+            Tab({id: "about", caption: "About", content: div().mar(5).marl(20).a(div().html(md2html(PROPS.readme)))}),
             Tab({id: "auth", caption: username, content: this.authDiv}),
-            Tab({id: "about", caption: "About", content: div().mar(5).marl(20).a(div().html(md2html(PROPS.readme)))})
         ])
 
         this.mainPane.headDiv.a(
             this.board,
-            this.controlPanel = div().mar(3).marl(0).w(this.board.boardsize() - 6).pad(3).bc("#cca").a(
+            this.controlPanel = div()
+                .dfc().flww().w(this.board.boardsize() - 6)
+                .mar(3).marl(0).pad(3).bc("#cca")
+                .a(
                 Button("i", this.board.reset.bind(this.board)).ff("lichess").bc("#faa"),
                 Button("B", this.board.doflip.bind(this.board)).ff("lichess").bc("#aff"),
                 Button("W", this.board.tobegin.bind(this.board)).ff("lichess").bc("#aaf"),                
@@ -814,7 +817,8 @@ class App extends SmartDomElement{
                 CheckBoxInput({id: "uselocalstockfishcheckbox", settings: this.settings}),
                 this.gobutton = Button("Go", this.go.bind(this)).bc("#afa"),
                 this.stopbutton = Button("Stop", this.stop.bind(this)).bc("#eee"),
-                this.commandInput = TextInput().w(80).ae("keyup", this.commandChanged.bind(this))
+                this.commandInput = TextInput().w(80).ae("keyup", this.commandChanged.bind(this),
+                )
             ),
             this.gametext = TextAreaInput().w(this.board.boardsize() - 6).h(120)
         )

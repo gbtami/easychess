@@ -24,7 +24,7 @@ class IndexedDB{
         let objectStore = this.db.transaction([store], "readwrite").objectStore(store)
         let requestUpdate = objectStore.put(obj)
 
-        return new Promise((resolve, reject)=>{                
+        return P((resolve, reject)=>{                
             requestUpdate.onsuccess = function(event) {    
                 resolve(dbResult(DB_OK, event))
             }
@@ -39,7 +39,7 @@ class IndexedDB{
         let objectStore = this.db.transaction([store], "readwrite").objectStore(store)
         let requestUpdate = objectStore.delete(key)
 
-        return new Promise((resolve, reject)=>{                
+        return P((resolve, reject)=>{                
             requestUpdate.onsuccess = function(event) {    
                 resolve(dbResult(DB_OK, event))
             }
@@ -55,7 +55,7 @@ class IndexedDB{
         let objectStore = transaction.objectStore(store)
         let request = objectStore.get(key)
 
-        return new Promise((resolve, reject)=>{                
+        return P((resolve, reject)=>{                
             request.onsuccess = function(_) {    
                 resolve(dbResult(DB_OK, request.result))
             }
@@ -70,7 +70,7 @@ class IndexedDB{
         let objectStore = this.db.transaction(store).objectStore(store)
         let getAll = objectStore.getAll()
 
-        return new Promise((resolve, reject)=>{                
+        return P((resolve, reject)=>{                
             getAll.onsuccess = function(event) {    
                 resolve(dbResult(DB_OK, event.target.result))
             }
@@ -92,7 +92,7 @@ class IndexedDB{
     }
 
     init(){
-        return new Promise((resolve, reject)=>{
+        return P((resolve, reject)=>{
             let req = window.indexedDB.open(this.databaseName, this.databaseVersion)
 
             req.onerror = (event) => {

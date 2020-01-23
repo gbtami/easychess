@@ -1,3 +1,5 @@
+const P = p => new Promise(p)
+
 let markdownconverter = null
 
 try{
@@ -231,7 +233,7 @@ function unZip(content, nameOpt){
     
     let unzip = new JSZip()            
 
-    return new Promise((resolve, reject)=>{
+    return P((resolve, reject)=>{
         unzip.loadAsync(content, {base64: true}).then(unzip=>
             unzip.file(name).async("text").then(content=> resolve(content)))
     })        
@@ -252,7 +254,7 @@ function downloadcontent(content, name){
 }
 
 function blobToDataURL(blob) {
-    return new Promise((resolve, _)=>{
+    return P((resolve, _)=>{
         let fr = new FileReader()
         fr.onload = ev => resolve(ev.target.result)
         fr.readAsDataURL(blob)

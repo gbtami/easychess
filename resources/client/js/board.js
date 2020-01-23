@@ -279,10 +279,24 @@ class Board_ extends SmartDomElement{
         if(message) this.commentcanvas.renderText(message, bs - 2 * this.commentmargin, this.commentfontsize * 1.1, this.commentmargin, this.commentmargin)
     }
 
+    highlightLastMove(){
+        let currentnode = this.game.getcurrentnode()
+        let highlightcanvas = this.getCanvasByName("highlight")
+        highlightcanvas.clear()        
+        if(currentnode.genalgeb){                        
+            let move = this.game.board.movefromalgeb(currentnode.genalgeb)                        
+            this.drawmovearrow(highlightcanvas, move, {
+                scalefactor: this.arrowscalefactor()
+            })
+        }
+    }
+
     draw(){
         this.getCanvasByName("dragpiece").clear()
 
         this.drawSquares()
+
+        this.highlightLastMove()
 
         this.drawPieces()
 

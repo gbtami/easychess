@@ -1372,7 +1372,7 @@ class Canvas_ extends SmartDomElement{
     }
 
     loadBackgroundImage(url){
-        return new Promise((resolve, _)=>{
+        return P((resolve, _)=>{
             let bimg = Img()
             bimg.ae("load", ()=>{
                 let mulx = Math.floor(this.width / bimg.naturalWidth) + 1
@@ -1387,7 +1387,7 @@ class Canvas_ extends SmartDomElement{
     }
 
     drawImageFromSrc(src, orig, sizeOpt){        
-        return new Promise((resolve, _)=>{
+        return P((resolve, _)=>{
             let img = Img()
             img.ae("load", ()=>{         
                 let size = sizeOpt || Vect(img.naturalWidth, img.naturalHeight)       
