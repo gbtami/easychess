@@ -26,29 +26,6 @@ passport.deserializeUser(function(obj, cb) {
 
 const app = express()
 
-app.use(require('cookie-parser')())
-app.use(require('body-parser').urlencoded({ extended: true }))
-app.use(require('express-session')({
-    secret: 'keyboard cat',
-    resave: true,
-    saveUninitialized: true,
-    cookie: {
-        maxAge: 1 * DAY
-    }
-}))
-app.use(passport.initialize())
-app.use(passport.session())
-
-app.get('/auth/lichess',
-  passport.authenticate('lichess'))
-
-app.get('/auth/lichess/callback', 
-    passport.authenticate('lichess', { failureRedirect: '/login' }),
-        function(req, res) {
-            res.redirect('/?login=ok')
-        }
-)
-
 const { readJson } = require('../utils/rwjson')
 const { update } = require('../utils/octokit')
 const sse = require('./sse')
@@ -84,16 +61,53 @@ fromchunks(sacckeypath)
 
 const admin = require("firebase-admin")
 
-admin.initializeApp({
+const firebase = admin.initializeApp({
     credential: admin.credential.cert(sacckeypath),
-    storageBucket: "pgneditor-1ab96.appspot.com"
+    storageBucket: "pgneditor-1ab96.appspot.com",
+    databaseURL: "https://pgneditor-1ab96.firebaseio.com/"
 })
 
 bucket = admin.storage().bucket()
+db = admin.database()
+firestore = firebase.firestore()
 
 bucket.upload(path.join(__rootdirname, "ReadMe.md"), {destination: "ReadMe.md"}, (err, _, apiResponse)=>{
     console.log(err ? "bucket test failed" : `bucket test ok, uploaded ReadMe.md, size ${apiResponse.size}`)
 })    
+//db.ref("test").set("test")
+/*db.ref("test").on("value", function(snapshot) {
+    console.log(`db ${snapshot.val()} ok`)
+}, function (errorObject) {
+    console.log(`db test failed ${errorObject.code}`)
+})*/
+
+app.use(require('cookie-parser')())
+app.use(require('body-parser').urlencoded({ extended: true }))
+const session = require('express-session')
+const FirestoreStore = require( 'firestore-store' )(session);
+app.use(session({
+    secret: 'keyboard cat',
+    resave: true,
+    saveUninitialized: true,
+    cookie: {
+        maxAge: 1 * DAY
+    },
+    store: new FirestoreStore({
+        database: firestore
+    })
+}))
+app.use(passport.initialize())
+app.use(passport.session())
+
+app.get('/auth/lichess',
+  passport.authenticate('lichess'))
+
+app.get('/auth/lichess/callback', 
+    passport.authenticate('lichess', { failureRedirect: '/login' }),
+        function(req, res) {
+            res.redirect('/?login=ok')
+        }
+)
 
 const STOCKFISH_PATH = path.join(__dirname, "bin/stockfish")
 
