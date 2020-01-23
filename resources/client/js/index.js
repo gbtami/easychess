@@ -103,8 +103,8 @@ class App extends SmartDomElement{
 
             this.showAnalysisinfo()
 
-            this.gobutton.bc(this.rai.running ? IDLE_BUTTON_COLOR : GREEN_BUTTON_COLOR)
-            this.stopbutton.bc(this.rai.running ? RED_BUTTON_COLOR : IDLE_BUTTON_COLOR)
+            this.gobutton.bc(this.rai && this.rai.running ? IDLE_BUTTON_COLOR : GREEN_BUTTON_COLOR)
+            this.stopbutton.bc(this.rai && this.rai.running ? RED_BUTTON_COLOR : IDLE_BUTTON_COLOR)
 
             if(this.storeOk()) IDB.put("engine", this.rai.analysisinfo)
         })
@@ -244,8 +244,7 @@ class App extends SmartDomElement{
         this.rai = null
         this.showAnalysisinfo()
 
-        if(this.shouldGo){
-            this.stop()
+        if(this.shouldGo){            
             this.go()
         }else{
             IDB.get("engine", this.board.analysiskey()).then(dbResult => {
