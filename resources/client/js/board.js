@@ -238,6 +238,7 @@ class Board_ extends SmartDomElement{
     }
 
     clearanalysisinfo(){
+        if(this.analysisinfoDiv) this.analysisinfoDiv.x()
         let analysiscanvas = this.getCanvasByName("analysis")
         analysiscanvas.clear()
         return analysiscanvas
@@ -265,7 +266,7 @@ class Board_ extends SmartDomElement{
         }
 
         if(this.analysisinfoDiv){
-            this.analysisinfoDiv.x().bc(richanalysisinfo.isLive ? "#afa" : "#eee")
+            this.analysisinfoDiv.bc(richanalysisinfo.isLive ? "#afa" : "#eee")
                 .a(analysisinfo.summary.map(item => div().marl(5).a(div()
                     .mar(1).pad(1).dfc().c(scoretorgb(item.scorenumerical))
                     .a(

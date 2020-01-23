@@ -245,6 +245,8 @@ class App extends SmartDomElement{
 
     positionchanged(){
         this.rai = null
+        this.storedrai = null
+        this.board.clearanalysisinfo()
         this.showAnalysisinfo()
 
         if(this.shouldGo){            
