@@ -64,8 +64,6 @@ class Board_ extends SmartDomElement{
             lm.sortweight = lm.gameNode ? 100 + lm.gameNode.sortweight() : 0
         })
 
-        console.log(lms)
-
         return lms
     }
 
