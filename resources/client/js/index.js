@@ -171,7 +171,7 @@ class App extends SmartDomElement{
         lms.sort((a,b) => (b.sortweight - a.sortweight))
 
         this.movesDiv.x().ame(
-            div().hh(this.board.boardsize()).df().a(
+            div().hh(this.board.boardsize() - 5).df().a(
                 div().ovfys().a(
                     lms.map(lm => div()
                         .ffm().dfc()
@@ -197,7 +197,7 @@ class App extends SmartDomElement{
                 })
                     .fs(16).w(300),            
             ),
-            this.pgnText = TextAreaInput().mart(6).w(760).h(GAMETEXT_HEIGHT).ae("paste", this.pgnPasted.bind(this))
+            this.pgnText = TextAreaInput().mart(4).w(760).h(GAMETEXT_HEIGHT).ae("paste", this.pgnPasted.bind(this))
             )
 
         this.pgnText.setValue(this.board.game.pgn())
@@ -965,7 +965,7 @@ class App extends SmartDomElement{
             Tab({id: "auth", caption: username, content: this.authDiv}),
         ])
 
-        this.mainPane.headDiv.a(div().dfcc().a(
+        this.mainPane.headDiv.jc("flex-start").a(div().dfcc().a(
             this.board,
             this.controlPanel = div()
                 .dfc().flww().w(this.board.boardsize() - 6)
@@ -981,7 +981,7 @@ class App extends SmartDomElement{
                     this.gobutton = Button("Go", this.go.bind(this)).bc(GREEN_BUTTON_COLOR),
                     this.stopbutton = Button("Stop", this.stop.bind(this)).bc(IDLE_BUTTON_COLOR),
                     this.lichessbutton = Button("L", this.lichess.bind(this)).bc(YELLOW_BUTTON_COLOR),
-                    this.commandInput = TextInput().w(80).ae("keyup", this.commandChanged.bind(this),
+                    this.commandInput = TextInput().w(60).ae("keyup", this.commandChanged.bind(this),
                 )
             ),
             this.gametext = TextAreaInput()
