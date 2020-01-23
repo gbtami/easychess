@@ -1442,7 +1442,7 @@ class SplitPane_ extends SmartDomElement{
 
         this.width = this.props.width || 600
         this.height = this.props.height || 400
-        this.headsize = this.props.headsize || 40
+        this.headsize = this.props.headsize || 36
 
         this.headDiv = div().dfca().bc(this.props.fitViewPort ? "#fff" : "#ddd")        
         this.bodyDiv = div().por().bc(this.props.fitViewPort ? "#fff" : "#ffe")

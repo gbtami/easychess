@@ -16,6 +16,7 @@ const PLAY_ANIMATION_DELAY      = 1000
 
 const QUERY_INTERVAL            = PROPS.QUERY_INTERVAL || 3000
 
+const GAMETEXT_HEIGHT           = 130
 const THUMB_SIZE                = 150
 
 const GREEN_BUTTON_COLOR        = "#afa"
@@ -169,34 +170,47 @@ class App extends SmartDomElement{
         let lms = this.board.getlms(RICH).sort((a,b) => a.san.localeCompare(b.san))                
         lms.sort((a,b) => (b.sortweight - a.sortweight))
 
-        this.movesDiv.x().ame(div().hh(this.board.boardsize()).df().a(
-            div().ovfys().a(
-                lms.map(lm => div()
-                    .ffm().dfc()
-                    .a(                                
-                        div()
-                            .cp().bc(lm.gameMove ? "#ccf" : "#eee")
-                            .fw(lm.gameMove ? "bold" : "normal")
-                            .pad(1).mar(1).w(60).html(lm.san)
-                            .ae("click", this.moveClicked.bind(this, lm)),
-                        ([0,1].map(index =>
-                            Combo({
-                                changeCallback: this.weightChanged.bind(this, index, lm),
-                                selected: lm.gameNode ? lm.gameNode.weights[index] : 0,
-                                options: Array(11).fill(null).map((_,i) => ({value: i, display: i}))
-                            }).mar(1)
-                    )),
-                ))
+        this.movesDiv.x().ame(
+            div().hh(this.board.boardsize()).df().a(
+                div().ovfys().a(
+                    lms.map(lm => div()
+                        .ffm().dfc()
+                        .a(                                
+                            div()
+                                .cp().bc(lm.gameMove ? "#ccf" : "#eee")
+                                .fw(lm.gameMove ? "bold" : "normal")
+                                .pad(1).mar(1).w(60).html(lm.san)
+                                .ae("click", this.moveClicked.bind(this, lm)),
+                            ([0,1].map(index =>
+                                Combo({
+                                    changeCallback: this.weightChanged.bind(this, index, lm),
+                                    selected: lm.gameNode ? lm.gameNode.weights[index] : 0,
+                                    options: Array(11).fill(null).map((_,i) => ({value: i, display: i}))
+                                }).mar(1)
+                        )),
+                    ))
+                ),
+                this.analysisinfoDiv,
+                this.commentTextArea = TextAreaInput({
+                    text: this.board.game.getcurrentnode().comment,
+                    changeCallback: this.commentChanged.bind(this)
+                })
+                    .fs(16).w(300),            
             ),
-            this.analysisinfoDiv,
-            this.commentTextArea = TextAreaInput({
-                text: this.board.game.getcurrentnode().comment,
-                changeCallback: this.commentChanged.bind(this)
-            })
-                .fs(16).w(300),            
-        ))
+            this.pgnText = TextAreaInput().mart(6).w(760).h(GAMETEXT_HEIGHT).ae("paste", this.pgnPasted.bind(this))
+            )
+
+        this.pgnText.setValue(this.board.game.pgn())
 
         this.commentTextArea.focus()
+    }
+
+    pgnPasted(ev){
+        let content = ev.clipboardData.getData('Text')        
+        let moves = content.split(/ |\./).filter(item=>item.match(/^[a-zA-Z]/))        
+        let game = Game().fromsans(moves)
+        this.alert(this.board.game.merge(game))                
+        this.board.positionchanged()
     }
 
     nodeClicked(node){
@@ -950,7 +964,7 @@ class App extends SmartDomElement{
             Tab({id: "auth", caption: username, content: this.authDiv}),
         ])
 
-        this.mainPane.headDiv.a(
+        this.mainPane.headDiv.a(div().dfcc().a(
             this.board,
             this.controlPanel = div()
                 .dfc().flww().w(this.board.boardsize() - 6)
@@ -970,9 +984,9 @@ class App extends SmartDomElement{
                 )
             ),
             this.gametext = TextAreaInput()
-                .w(this.board.boardsize() - 6)
-                .h(140)
-        )
+                .w(this.board.boardsize() - 12)
+                .h(GAMETEXT_HEIGHT)
+        ))
 
         this.mainPane.setContent(this.tabs)
 
