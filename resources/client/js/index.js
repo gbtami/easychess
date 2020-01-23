@@ -96,7 +96,7 @@ class App extends SmartDomElement{
             fen: this.board.game.fen()
         }
 
-        if(this.settings.uselocalstockfishcheckbox.checked){
+        if(this.settings.uselocalstockfishCheckbox.checked){
             this.engine.setcommand("go", payload)
         }else{
             payload.threads = parseInt(this.settings.threadsCombo.selected) || DEFAULT_THREADS,
@@ -109,7 +109,7 @@ class App extends SmartDomElement{
     stop(){
         this.shouldGo = false
 
-        if(this.settings.uselocalstockfishcheckbox.checked){
+        if(this.settings.uselocalstockfishCheckbox.checked){
             this.engine.setcommand("stop")
         }else{
             api("engine:stop", {}, response => {
@@ -872,11 +872,16 @@ class App extends SmartDomElement{
 
         this.settingsDiv = div().a(FormTable({
             options: [
+                CheckBoxInput({
+                    id: "uselocalstockfishCheckbox",                    
+                    display: "Use local Stockfish",                                        
+                    settings: this.settings
+                }),
                 Combo({                    
                     id: "multipvCombo",                    
-                    display: "MultiPV",                    
-                    selected: DEFAULT_MULTIPV,
+                    display: "MultiPV",                                        
                     options: Array(20).fill(null).map((_, i) => ({value: i+1, display: i+1})),
+                    selected: DEFAULT_MULTIPV,
                     settings: this.settings
                 }),
                 Combo({                    
@@ -914,8 +919,7 @@ class App extends SmartDomElement{
                     Button("Y", this.board.back.bind(this.board)).ff("lichess").bc(GREEN_BUTTON_COLOR),
                     Button("X", this.board.forward.bind(this.board)).ff("lichess").bc(GREEN_BUTTON_COLOR),
                     Button("V", this.board.toend.bind(this.board)).ff("lichess").bc(BLUE_BUTTON_COLOR),
-                    Button("L", this.board.del.bind(this.board)).ff("lichess").bc(RED_BUTTON_COLOR),
-                    CheckBoxInput({id: "uselocalstockfishcheckbox", settings: this.settings}),
+                    Button("L", this.board.del.bind(this.board)).ff("lichess").bc(RED_BUTTON_COLOR),                    
                     this.gobutton = Button("Go", this.go.bind(this)).bc(GREEN_BUTTON_COLOR),
                     this.stopbutton = Button("Stop", this.stop.bind(this)).bc(IDLE_BUTTON_COLOR),
                     this.commandInput = TextInput().w(80).ae("keyup", this.commandChanged.bind(this),
