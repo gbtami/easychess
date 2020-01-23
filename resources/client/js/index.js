@@ -5,6 +5,7 @@ const STOCKFISH_JS_PATH         = "resources/client/cdn/stockfish.wasm.js"
 const BACKUP_FETCH_URL          = "https://raw.githubusercontent.com/easychessanimations/easychess/master/backup/backup.txt"
 const IMAGE_STORE_PATH          = "/resources/client/img/imagestore"
 const LICHESS_LOGIN_URL         = "/auth/lichess"
+const LICHESS_ANALYSIS_URL      = "https://lichess.org/analysis"
 
 const POSITION_CHANGED_DELAY    = 500
 const ALERT_DELAY               = 3000
@@ -21,6 +22,7 @@ const GREEN_BUTTON_COLOR        = "#afa"
 const BLUE_BUTTON_COLOR         = "#aaf"
 const CYAN_BUTTON_COLOR         = "#aff"
 const RED_BUTTON_COLOR          = "#faa"
+const YELLOW_BUTTON_COLOR       = "#ffa"
 const IDLE_BUTTON_COLOR         = "#eee"
 
 const TREE_SEED                 = 10
@@ -830,6 +832,11 @@ class App extends SmartDomElement{
         }
     }
 
+    lichess(){
+        let url = `${LICHESS_ANALYSIS_URL}/${this.board.game.variant}/${this.board.game.fen()}`
+        window.open(url)
+    }
+
     constructor(props){
         super("div", props)
 
@@ -958,6 +965,7 @@ class App extends SmartDomElement{
                     Button("L", this.board.del.bind(this.board)).ff("lichess").bc(RED_BUTTON_COLOR),                    
                     this.gobutton = Button("Go", this.go.bind(this)).bc(GREEN_BUTTON_COLOR),
                     this.stopbutton = Button("Stop", this.stop.bind(this)).bc(IDLE_BUTTON_COLOR),
+                    this.lichessbutton = Button("L", this.lichess.bind(this)).bc(YELLOW_BUTTON_COLOR),
                     this.commandInput = TextInput().w(80).ae("keyup", this.commandChanged.bind(this),
                 )
             ),
