@@ -94,7 +94,7 @@ class App extends SmartDomElement{
     storeOk(){
         if(!this.raiok(this.rai)) return false        
         if(!this.raiok(this.storedrai)) return true
-        return (this.storedrai.analysisinfo.lastcompleteddepth < this.rai.analysisinfo.lastcompleteddepth)
+        return (this.storedrai.analysisinfo.lastcompleteddepth <= this.rai.analysisinfo.lastcompleteddepth)
     }
 
     processanalysisinfo(analysisinfo){
