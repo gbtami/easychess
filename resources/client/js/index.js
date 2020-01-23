@@ -1,36 +1,38 @@
 ////////////////////////////////////////////////////////////////////////////////
 // config
 
-const STOCKFISH_JS_PATH = "resources/client/cdn/stockfish.wasm.js"
-const BACKUP_FETCH_URL = "https://raw.githubusercontent.com/easychessanimations/easychess/master/backup/backup.txt"
-const IMAGE_STORE_PATH = "/resources/client/img/imagestore"
-const LICHESS_LOGIN_URL = "/auth/lichess"
+const STOCKFISH_JS_PATH         = "resources/client/cdn/stockfish.wasm.js"
+const BACKUP_FETCH_URL          = "https://raw.githubusercontent.com/easychessanimations/easychess/master/backup/backup.txt"
+const IMAGE_STORE_PATH          = "/resources/client/img/imagestore"
+const LICHESS_LOGIN_URL         = "/auth/lichess"
 
-const POSITION_CHANGED_DELAY = 500
-const ALERT_DELAY = 3000
-const REBUILD_IMAGES_DELAY = 3000
-const STORE_DEFAULT_DELAY = 1000
-const HIGHLIGHT_DRAWINGS_DELAY = 250
-const PLAY_ANIMATION_DELAY = 1000
+const POSITION_CHANGED_DELAY    = 500
+const ALERT_DELAY               = 3000
+const REBUILD_IMAGES_DELAY      = 3000
+const STORE_DEFAULT_DELAY       = 1000
+const HIGHLIGHT_DRAWINGS_DELAY  = 250
+const PLAY_ANIMATION_DELAY      = 1000
 
-const QUERY_INTERVAL = PROPS.QUERY_INTERVAL || 3000
+const QUERY_INTERVAL            = PROPS.QUERY_INTERVAL || 3000
 
-const THUMB_SIZE = 150
+const THUMB_SIZE                = 150
 
-const GREEN_BUTTON_COLOR = "#afa"
-const BLUE_BUTTON_COLOR = "#aaf"
-const CYAN_BUTTON_COLOR = "#aff"
-const RED_BUTTON_COLOR = "#faa"
-const IDLE_BUTTON_COLOR = "#eee"
+const GREEN_BUTTON_COLOR        = "#afa"
+const BLUE_BUTTON_COLOR         = "#aaf"
+const CYAN_BUTTON_COLOR         = "#aff"
+const RED_BUTTON_COLOR          = "#faa"
+const IDLE_BUTTON_COLOR         = "#eee"
 
-const TREE_SEED = 10
-const TREE_MAX_DEPTH = 10
+const TREE_SEED                 = 10
+const TREE_MAX_DEPTH            = 10
 
-const DEFAULT_FRAME_DELAY = 1000
+const DEFAULT_FRAME_DELAY       = 1000
+
+const PASSWORD_KEY              = "PASSWORD"
+
+const DEFAULT_MULTIPV           = 5
 
 const REMOVE_IMAGE_EXTENSION_REGEXP = /\.JPG$|\.PNG$|\.GIF$/i
-
-const PASSWORD_KEY = "PASSWORD"
 
 const BACKUP_STORAGES = [
     "engine",
@@ -88,7 +90,7 @@ class App extends SmartDomElement{
         this.shouldGo = true
 
         let payload = {
-            multipv: 5,
+            multipv: DEFAULT_MULTIPV,
             fen: this.board.game.fen()
         }
 
@@ -137,18 +139,23 @@ class App extends SmartDomElement{
     buildMoves(){
         let lms = this.board.getlms(RICH).sort((a,b) => a.san.localeCompare(b.san))                
         lms.sort((a,b) => ( ( b.gameMove - a.gameMove ) * 100 + ( b.weights[0] - a.weights[0] ) * 10 + ( b.weights[1] - a.weights[1] ) ))
+
         this.movesDiv.x().ame(div().hh(this.board.boardsize()).df().a(
             div().ovfys().a(
-                lms.map(lm => div().ffm().dfc().a(                                
-                    div().cp().bc(lm.gameMove ? "#ccf" : "#eee").fw(lm.gameMove ? "bold" : "normal")
-                    .pad(1).mar(1).w(60).html(lm.san)
-                    .ae("click", this.moveClicked.bind(this, lm)),
-                    ([0,1].map(index =>
-                        Combo({
-                            changeCallback: this.weightChanged.bind(this, index, lm),
-                            selected: lm.gameNode ? lm.gameNode.weights[index] : 0,
-                            options: Array(11).fill(null).map((_,i) => ({value: i, display: i}))
-                        }).mar(1)
+                lms.map(lm => div()
+                    .ffm().dfc()
+                    .a(                                
+                        div()
+                            .cp().bc(lm.gameMove ? "#ccf" : "#eee")
+                            .fw(lm.gameMove ? "bold" : "normal")
+                            .pad(1).mar(1).w(60).html(lm.san)
+                            .ae("click", this.moveClicked.bind(this, lm)),
+                        ([0,1].map(index =>
+                            Combo({
+                                changeCallback: this.weightChanged.bind(this, index, lm),
+                                selected: lm.gameNode ? lm.gameNode.weights[index] : 0,
+                                options: Array(11).fill(null).map((_,i) => ({value: i, display: i}))
+                            }).mar(1)
                     )),
                 ))
             ),
@@ -169,14 +176,15 @@ class App extends SmartDomElement{
         if(depth > maxdepth) return div().html("...")
 
         let def = this.board.game.getcurrentnode()
-        for(let i=0;i<5;i++) if(def.getparent()) def = def.getparent()
+        for(let i=0; i<5; i++) if(def.getparent()) def = def.getparent()
         let node = nodeOpt || def
         let current = node.id == node.parentgame.currentnodeid
         let rgb = rgbopt || randrgb()        
         if(node.childids.length > 1) rgb = randrgb()
 
         return div()
-            .ac("unselectable").mar(rgb == rgbopt ? 0 : 3).bc(rgb).dfcc()
+            .dfcc().mar(rgb == rgbopt ? 0 : 3)
+            .ac("unselectable").bc(rgb)
             .a(
                 div()
                     .w(60).cp().pad(2).bdr("solid", 3, current ? "#0f0" : "#ddd")
@@ -196,11 +204,13 @@ class App extends SmartDomElement{
 
     showTree(){
         seed = TREE_SEED
-        this.treeDiv.x().a(this.buildTree(null, null, 0, TREE_MAX_DEPTH))
+        this.treeDiv.x().a(
+            this.buildTree(null, null, 0, TREE_MAX_DEPTH)
+        )
     }
 
     storeDefault(){        
-        this.storeStudy("Default", this.board.game.serialize())
+        this.storeStudy("Default", this.board.game)
     }
 
     positionchanged(){
@@ -285,14 +295,16 @@ class App extends SmartDomElement{
     storeStudy(title, game){
         IDB.put("study", {
             title: title,
-            game: game
+            game: game.serialize()
         })
     }
 
     alert(msg){
         this.alertDiv.show(true).html(msg)
 
-        setTimeout(() => {this.alertDiv.show(false)}, ALERT_DELAY)
+        setTimeout(() => {
+            this.alertDiv.show(false)
+        }, ALERT_DELAY)
     }
 
     deleteImage(name){
@@ -327,6 +339,7 @@ class App extends SmartDomElement{
         canvas.drawImageFromSrc(content, Vect(0,0)).then(() => {                    
             let offername = nameorig.replace(REMOVE_IMAGE_EXTENSION_REGEXP, "")
             let name = window.prompt("Image name :", offername)
+
             IDB.put("image", {
                 name: name,
                 imgsrc: content
@@ -359,9 +372,13 @@ class App extends SmartDomElement{
     }
 
     addAnimationCallback(){                
-        let [ value, display ] = [ this.board.game.currentnodeid + "_" + UID() , "Animation " + this.board.game.line() ]
+        let [ value, display ] =
+            [ this.board.game.currentnodeid + "_" + UID() , "Animation " + this.board.game.line() ]
+
         display = window.prompt("Animation name : ", display)
+
         this.alert(`Added animation ${display} under id ${value}.`)
+
         return [ value, display ]
     }
 
@@ -369,7 +386,9 @@ class App extends SmartDomElement{
         let g = this.board.game
         g.animations = options
         g.selectedAnimation = selected
+
         this.buildAnimsDiv()
+
         this.doLater("storeDefault", STORE_DEFAULT_DELAY)
     }
 
@@ -379,10 +398,12 @@ class App extends SmartDomElement{
 
     selAnimChanged(selected, options){
         let g = this.board.game
+
         g.animationDescriptors[g.selectedAnimation.value] = {
             selected: selected,
             list: options
         }                                
+
         try{
             this.board.setfromnode(g.gamenodes[selected.value])
         }catch(err){
@@ -597,6 +618,7 @@ class App extends SmartDomElement{
             localStorageEntries: Object.entries(localStorage)
                 .filter(entry => entry[0] != PASSWORD_KEY)
         }
+
         IDB.getAlls(BACKUP_STORAGES).then(result => {
             obj.indexedDB = result
             resolve(obj)
@@ -604,16 +626,20 @@ class App extends SmartDomElement{
     })}
 
     createZippedBackup(){return P(resolve => {
-            this.createBackupBlob().then(blob=>{
-                resolve(createZip(JSON.stringify(blob)))
-            })
+        this.createBackupBlob().then(blob => {
+            resolve(createZip(JSON.stringify(blob)))
+        })
     })}
 
     askPass(){
         let storedPass = localStorage.getItem(PASSWORD_KEY)
+
         if(storedPass) return storedPass
+
         let password = window.prompt("Password : ")
+
         localStorage.setItem(PASSWORD_KEY, password)
+
         return password
     }
 
@@ -627,12 +653,15 @@ class App extends SmartDomElement{
         unZip(content).then(blobstr => {
             let blob = JSON.parse(blobstr)
             let i = 0
+
             for(let entry of blob.localStorageEntries){
                 localStorage.setItem(entry[0], entry[1])
                 i++
             }
+
             let si = 0
             let ki = 0                
+
             for(let store in blob.indexedDB){                                
                 for(let obj of blob.indexedDB[store].content){                    
                     console.log(store, obj);
@@ -643,19 +672,24 @@ class App extends SmartDomElement{
                 }
                 si ++
             }
+
             this.alert(`Restored ${i} localStorage item(s), ${si} indexedDB store(s), ${ki} indexedDB object(s).`)
+
             setTimeout(() => document.location.reload(), ALERT_DELAY)
         })
     }
 
     backupPasted(ev){
         let content = ev.clipboardData.getData('Text')        
+
         this.backupTextArea.setCopy(content)
+
         this.setFromBackup(content)
     }
 
     setPassword(){
         localStorage.removeItem(PASSWORD_KEY)
+
         this.askPass()
     }
 
@@ -820,14 +854,16 @@ class App extends SmartDomElement{
         }
 
         this.backupDiv = div().a(
-            div().mar(5).a(
-                Button("Show", this.showBackup.bind(this)),
-                Button("Backup Remote", this.backupRemote.bind(this)),
-                Button("Restore Remote", this.restoreRemote.bind(this)),
-                Button("Backup Local", this.backupLocal.bind(this)),
-                Button("Backup Git", this.backupGit.bind(this)),
-                Button("Restore Git", this.restoreGit.bind(this)),
-            ),            
+            div()
+                .mar(5)
+                .a(
+                    Button("Show", this.showBackup.bind(this)),
+                    Button("Backup Remote", this.backupRemote.bind(this)),
+                    Button("Restore Remote", this.restoreRemote.bind(this)),
+                    Button("Backup Local", this.backupLocal.bind(this)),
+                    Button("Backup Git", this.backupGit.bind(this)),
+                    Button("Restore Git", this.restoreGit.bind(this)),
+                ),            
             this.backupTextArea = TextAreaInput().mar(10).w(this.board.boardsize()).h(this.board.boardsize())
                 .ae("paste", this.backupPasted.bind(this)).dropLogic(this.backupDropped.bind(this))
         )
@@ -848,17 +884,17 @@ class App extends SmartDomElement{
                 .dfc().flww().w(this.board.boardsize() - 6)
                 .mar(3).marl(0).pad(3).bc("#cca")
                 .a(
-                Button("i", this.board.reset.bind(this.board)).ff("lichess").bc(RED_BUTTON_COLOR),
-                Button("B", this.board.doflip.bind(this.board)).ff("lichess").bc(CYAN_BUTTON_COLOR),
-                Button("W", this.board.tobegin.bind(this.board)).ff("lichess").bc(BLUE_BUTTON_COLOR),                
-                Button("Y", this.board.back.bind(this.board)).ff("lichess").bc(GREEN_BUTTON_COLOR),
-                Button("X", this.board.forward.bind(this.board)).ff("lichess").bc(GREEN_BUTTON_COLOR),
-                Button("V", this.board.toend.bind(this.board)).ff("lichess").bc(BLUE_BUTTON_COLOR),
-                Button("L", this.board.del.bind(this.board)).ff("lichess").bc(RED_BUTTON_COLOR),
-                CheckBoxInput({id: "uselocalstockfishcheckbox", settings: this.settings}),
-                this.gobutton = Button("Go", this.go.bind(this)).bc(GREEN_BUTTON_COLOR),
-                this.stopbutton = Button("Stop", this.stop.bind(this)).bc(IDLE_BUTTON_COLOR),
-                this.commandInput = TextInput().w(80).ae("keyup", this.commandChanged.bind(this),
+                    Button("i", this.board.reset.bind(this.board)).ff("lichess").bc(RED_BUTTON_COLOR),
+                    Button("B", this.board.doflip.bind(this.board)).ff("lichess").bc(CYAN_BUTTON_COLOR),
+                    Button("W", this.board.tobegin.bind(this.board)).ff("lichess").bc(BLUE_BUTTON_COLOR),                
+                    Button("Y", this.board.back.bind(this.board)).ff("lichess").bc(GREEN_BUTTON_COLOR),
+                    Button("X", this.board.forward.bind(this.board)).ff("lichess").bc(GREEN_BUTTON_COLOR),
+                    Button("V", this.board.toend.bind(this.board)).ff("lichess").bc(BLUE_BUTTON_COLOR),
+                    Button("L", this.board.del.bind(this.board)).ff("lichess").bc(RED_BUTTON_COLOR),
+                    CheckBoxInput({id: "uselocalstockfishcheckbox", settings: this.settings}),
+                    this.gobutton = Button("Go", this.go.bind(this)).bc(GREEN_BUTTON_COLOR),
+                    this.stopbutton = Button("Stop", this.stop.bind(this)).bc(IDLE_BUTTON_COLOR),
+                    this.commandInput = TextInput().w(80).ae("keyup", this.commandChanged.bind(this),
                 )
             ),
             this.gametext = TextAreaInput().w(this.board.boardsize() - 6).h(120)
