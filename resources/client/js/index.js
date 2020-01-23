@@ -24,6 +24,7 @@ const RED_BUTTON_COLOR          = "#faa"
 const IDLE_BUTTON_COLOR         = "#eee"
 
 const TREE_SEED                 = 10
+const TREE_BACKWARD_DEPTH       = 5
 const TREE_MAX_DEPTH            = 10
 
 const DEFAULT_FRAME_DELAY       = 1000
@@ -49,9 +50,9 @@ class LocalEngine extends AbstractEngine{
     spawnengineprocess(){
         this.stockfish = new Worker(STOCKFISH_JS_PATH)
 
-        this.stockfish.onmessage = function(message){
+        this.stockfish.onmessage = message => {
             this.processstdoutline(message.data)
-        }.bind(this)
+        }
     }
 
     sendcommandtoengine(command){
@@ -62,7 +63,7 @@ class LocalEngine extends AbstractEngine{
 class App extends SmartDomElement{
     raiok(){
         if(!this.rai) return false
-        return this.rai.analysisinfo.analysiskey == this.board.analysiskey()
+        return ( this.rai.analysisinfo.analysiskey == this.board.analysiskey() )
     }
 
     showanalysisinfo(){        
@@ -176,7 +177,7 @@ class App extends SmartDomElement{
         if(depth > maxdepth) return div().html("...")
 
         let def = this.board.game.getcurrentnode()
-        for(let i=0; i<5; i++) if(def.getparent()) def = def.getparent()
+        for(let i = 0; i < TREE_BACKWARD_DEPTH; i++) if(def.getparent()) def = def.getparent()
         let node = nodeOpt || def
         let current = node.id == node.parentgame.currentnodeid
         let rgb = rgbopt || randrgb()        
@@ -204,6 +205,7 @@ class App extends SmartDomElement{
 
     showTree(){
         seed = TREE_SEED
+
         this.treeDiv.x().a(
             this.buildTree(null, null, 0, TREE_MAX_DEPTH)
         )
@@ -245,15 +247,12 @@ class App extends SmartDomElement{
     checksource(){
         let elapsed = performance.now() - this.lasttick
 
-        if(elapsed > 2 * QUERY_INTERVAL){
+        if(elapsed > ( 2 * QUERY_INTERVAL ) ){
             this.clog(`event source timed out, setting up new`)
 
             this.lasttick = performance.now()
 
             this.setupsource()
-        }
-        else{
-            
         }
     }
 
@@ -262,24 +261,24 @@ class App extends SmartDomElement{
 
         this.source = new EventSource('/stream')
 
-        this.source.addEventListener('message', function(e){
+        this.source.addEventListener('message', e => {
             let analysisinfo = JSON.parse(e.data)
             if(analysisinfo.kind == "tick"){
                 this.lasttick = performance.now()
             }else{
                 this.processanalysisinfo(analysisinfo)
             }            
-        }.bind(this), false)
+        }, false)
 
-        this.source.addEventListener('open', function(e){            
+        this.source.addEventListener('open', _ => {            
             this.clog("connection opened")
-        }.bind(this), false)
+        }, false)
 
-        this.source.addEventListener('error', function(e){
+        this.source.addEventListener('error', e => {
             if (e.readyState == EventSource.CLOSED) {                
                 this.clog("connection closed")
             }
-        }.bind(this), false)
+        }, false)
 
         this.lasttick = performance.now()
     }
@@ -338,7 +337,7 @@ class App extends SmartDomElement{
 
         canvas.drawImageFromSrc(content, Vect(0,0)).then(() => {                    
             let offername = nameorig.replace(REMOVE_IMAGE_EXTENSION_REGEXP, "")
-            let name = window.prompt("Image name :", offername)
+            let name = window.prompt("Image name : ", offername)
 
             IDB.put("image", {
                 name: name,
@@ -347,7 +346,7 @@ class App extends SmartDomElement{
                 if(result.ok){
                     this.alert(`Image ${name} stored.`)
                     this.showImages()
-                    setTimeout(function(){canvas.clear()}.bind(this), REBUILD_IMAGES_DELAY)
+                    setTimeout(function(){canvas.clear()}.bind(this), ALERT_DELAY)
                 }else{
                     this.alert(`Storing image ${name} failed.`)
                 }
@@ -372,8 +371,10 @@ class App extends SmartDomElement{
     }
 
     addAnimationCallback(){                
-        let [ value, display ] =
-            [ this.board.game.currentnodeid + "_" + UID() , "Animation " + this.board.game.line() ]
+        let [ value, display ] = [
+            this.board.game.currentnodeid + "_" + UID(),
+            "Animation " + this.board.game.line()
+        ]
 
         display = window.prompt("Animation name : ", display)
 
@@ -393,7 +394,10 @@ class App extends SmartDomElement{
     }
 
     addSelAnimationCallback(){
-        return [ this.board.game.currentnodeid, "root " + this.board.game.line() ]
+        return [
+            this.board.game.currentnodeid,
+            "root " + this.board.game.line()
+        ]
     }
 
     selAnimChanged(selected, options){
@@ -522,13 +526,13 @@ class App extends SmartDomElement{
         canvas.ctx.drawImage(this.board.getCanvasByName("piece").e, 0, 0)
         canvas.ctx.drawImage(this.board.getCanvasByName("drawings").e, 0, 0)
 
-        let finalizefunc = function(){
+        let finalizefunc = _ => {
             canvas.ctx.drawImage(this.board.commentcanvas.e, bs, 0)
 
             this.gif.addFrame(canvas.e, {delay: props.delay || DEFAULT_FRAME_DELAY})
 
             resolve(true)
-        }.bind(this)            
+        }
 
         let drawings = this.board.game.getcurrentnode().drawings()
 
@@ -868,13 +872,15 @@ class App extends SmartDomElement{
                 .ae("paste", this.backupPasted.bind(this)).dropLogic(this.backupDropped.bind(this))
         )
 
+        this.aboutDiv = div().mar(5).marl(20).a(div().html(md2html(PROPS.readme)))
+
         this.tabs = TabPane({id: "maintabpane"}).setTabs([
             Tab({id: "moves", caption: "Moves", content: this.movesDiv}),
             Tab({id: "tree", caption: "Tree", content: this.treeDiv}),
             Tab({id: "images", caption: "Images", content: this.imageDiv}),
             Tab({id: "anims", caption: "Animations", content: this.animsDiv}),
             Tab({id: "backup", caption: "Backup", content: this.backupDiv}),            
-            Tab({id: "about", caption: "About", content: div().mar(5).marl(20).a(div().html(md2html(PROPS.readme)))}),
+            Tab({id: "about", caption: "About", content: this.aboutDiv}),
             Tab({id: "auth", caption: username, content: this.authDiv}),
         ])
 
@@ -897,7 +903,9 @@ class App extends SmartDomElement{
                     this.commandInput = TextInput().w(80).ae("keyup", this.commandChanged.bind(this),
                 )
             ),
-            this.gametext = TextAreaInput().w(this.board.boardsize() - 6).h(120)
+            this.gametext = TextAreaInput()
+                .w(this.board.boardsize() - 6)
+                .h(120)
         )
 
         this.mainPane.setContent(this.tabs)
@@ -926,7 +934,7 @@ class App extends SmartDomElement{
         })
     
         this.gif.on('finished', function(blob) {
-            window.open(URL.createObjectURL(blob));
+            window.open(URL.createObjectURL(blob))
         })
     }
 }
