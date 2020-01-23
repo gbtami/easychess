@@ -69,6 +69,8 @@ class App extends SmartDomElement{
 
     showAnalysisinfo(){        
         let text = "--> no analysis available"        
+
+        this.board.analysisinfoDiv = this.analysisinfoDiv
     
         if(this.raiok(this.rai) && this.raiok(this.storedrai)){
             if(this.storeOk()){
@@ -184,11 +186,12 @@ class App extends SmartDomElement{
                     )),
                 ))
             ),
+            this.analysisinfoDiv,
             this.commentTextArea = TextAreaInput({
                 text: this.board.game.getcurrentnode().comment,
                 changeCallback: this.commentChanged.bind(this)
             })
-                .fs(16).w(300)
+                .fs(16).w(300),            
         ))
 
         this.commentTextArea.focus()
@@ -847,6 +850,8 @@ class App extends SmartDomElement{
         this.mainPane.a(this.alertDiv)
 
         this.movesDiv = div()
+
+        this.analysisinfoDiv = div().w(300).ovfs()
 
         this.treeDiv = div()
 

@@ -58,7 +58,7 @@ class Board_ extends SmartDomElement{
     getlms(RICH){
         let lms = this.game.board.legalmovesforallpieces()
 
-        if(RICH) lms.forEach(lm=>{
+        if(RICH) lms.forEach(lm => {
             lm.san = this.game.board.movetosan(lm)
             lm.gameNode = this.game.getcurrentnode().sortedchilds().find(child=>child.gensan == lm.san)
             lm.gameMove = lm.gameNode ? 1 : 0
@@ -262,6 +262,24 @@ class Board_ extends SmartDomElement{
                 auxscalefactor: 1/i--,
                 color: scoretorgb(item.scorenumerical)
             })      
+        }
+
+        if(this.analysisinfoDiv){
+            this.analysisinfoDiv.x().bc(richanalysisinfo.isLive ? "#afa" : "#eee")
+                .a(analysisinfo.summary.map(item => div().marl(5).a(div()
+                    .mar(1).pad(1).dfc().c(scoretorgb(item.scorenumerical))
+                    .a(
+                        div()
+                            .mar(1).pad(1).w(80).html(item.san).fs(26).fwb().cp()
+                            .ae("mousedown", this.idParent().moveClicked.bind(this.idParent(), item.move)),
+                        div().mar(1).pad(1).w(100).html(`${item.scorenumerical}`).fs(22).fwb(),
+                        div().c("#00a").fwb().html(`${richanalysisinfo.analysisinfo.lastcompleteddepth}`)
+                    ),
+                    div().w(2000).dfc().flwn().marl(10).ffm().fs(14).a(
+                        item.pvsans.slice(1).map(san => div().c("#33a").bc("#ddd").marr(8).html(san))
+                    )
+                )
+            ))
         }
     }
 

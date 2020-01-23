@@ -196,6 +196,7 @@ class SmartDomElement{
     dfca(){return this.dfc().jc("space-around")}
     flw(x){return this.addStyle("flexWrap", x)}    
     flww(){return this.flw("wrap")}
+    flwn(){return this.flw("no-wrap")}
     pos(x){return this.addStyle("position", x)}    
     por(){return this.pos("relative")}
     poa(){return this.pos("absolute")}

@@ -55,31 +55,41 @@ function clog(msg){
 
 const __rootdirname = path.join(__dirname, '../..')
 
-let sacckeypath = path.join(__rootdirname, "firebase/sacckey.json")
+var admin = null
+var firebase = null
+var bucket = null
+var db = null
+var firestore = null
 
-fromchunks(sacckeypath)
+if(process.env.SKIP_FIREBASE){
+    console.log("skip firebase")
+}else{
+    let sacckeypath = path.join(__rootdirname, "firebase/sacckey.json")
 
-const admin = require("firebase-admin")
+    fromchunks(sacckeypath)
 
-const firebase = admin.initializeApp({
-    credential: admin.credential.cert(sacckeypath),
-    storageBucket: "pgneditor-1ab96.appspot.com",
-    databaseURL: "https://pgneditor-1ab96.firebaseio.com/"
-})
+    admin = require("firebase-admin")
 
-bucket = admin.storage().bucket()
-db = admin.database()
-firestore = firebase.firestore()
+    firebase = admin.initializeApp({
+        credential: admin.credential.cert(sacckeypath),
+        storageBucket: "pgneditor-1ab96.appspot.com",
+        databaseURL: "https://pgneditor-1ab96.firebaseio.com/"
+    })
 
-bucket.upload(path.join(__rootdirname, "ReadMe.md"), {destination: "ReadMe.md"}, (err, _, apiResponse)=>{
-    console.log(err ? "bucket test failed" : `bucket test ok, uploaded ReadMe.md, size ${apiResponse.size}`)
-})    
-//db.ref("test").set("test")
-/*db.ref("test").on("value", function(snapshot) {
-    console.log(`db ${snapshot.val()} ok`)
-}, function (errorObject) {
-    console.log(`db test failed ${errorObject.code}`)
-})*/
+    bucket = admin.storage().bucket()
+    db = admin.database()
+    firestore = firebase.firestore()
+
+    bucket.upload(path.join(__rootdirname, "ReadMe.md"), {destination: "ReadMe.md"}, (err, _, apiResponse)=>{
+        console.log(err ? "bucket test failed" : `bucket test ok, uploaded ReadMe.md, size ${apiResponse.size}`)
+    })    
+    //db.ref("test").set("test")
+    /*db.ref("test").on("value", function(snapshot) {
+        console.log(`db ${snapshot.val()} ok`)
+    }, function (errorObject) {
+        console.log(`db test failed ${errorObject.code}`)
+    })*/
+}
 
 app.use(require('cookie-parser')())
 app.use(require('body-parser').urlencoded({ extended: true }))
@@ -92,9 +102,9 @@ app.use(session({
     cookie: {
         maxAge: 1 * YEAR
     },
-    store: new FirestoreStore({
+    store: firestore ? new FirestoreStore({
         database: firestore
-    })
+    }) : undefined
 }))
 app.use(passport.initialize())
 app.use(passport.session())
