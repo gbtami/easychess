@@ -1478,6 +1478,7 @@ class AbstractEngine{
     this.nps = 0
 
     this.multipv = payload.multipv || 1            
+    this.threads = payload.threads || 1            
     this.analyzedfen = payload.fen     
     this.variant = payload.variant || DEFAULT_VARIANT        
     this.analysiskey = payload.analysiskey || `analysis/${this.variant}/${strippedfen(this.analyzedfen)}`               
@@ -1493,6 +1494,7 @@ class AbstractEngine{
 
     this.analysisinfo = {      
       multipv: this.multipv,    
+      threads: this.threads,    
       analyzedfen: this.analyzedfen,        
       variant: this.variant,
       analysiskey: this.analysiskey,
@@ -1502,6 +1504,7 @@ class AbstractEngine{
 
     this.issuecommand(`setoption name UCI_Variant value ${this.variant == "standard" ? "chess" : this.variant}`)
     this.issuecommand(`setoption name MultiPV value ${this.multipv}`)        
+    this.issuecommand(`setoption name Threads value ${this.threads}`)        
     this.issuecommand(`position fen ${this.analyzedfen}`)    
     this.issuecommand(`go infinite`)   
 

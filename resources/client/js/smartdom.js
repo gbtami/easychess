@@ -582,15 +582,21 @@ class Combo_ extends SmartDomElement{
 
     change(){
         if(this.props.changeCallback) this.props.changeCallback(this.value())
+        if(this.id){
+            this.state.selected = this.value()
+            this.storeState()
+        }
     }
 
     init(){        
-        this.ae("change", this.change.bind(this))        
+        this.ae("change", this.change.bind(this))                
+        if(typeof this.state.selected == "undefined") this.state.selected = this.props.selected
         this.ame(
             this.props.options.map(option => (
-                ComboOption({value: option.value, display: option.display, selected: option.value == this.props.selected})
+                ComboOption({value: option.value, display: option.display, selected: option.value == this.state.selected})
             ))
         )
+        this.storeState()
     }
 }
 function Combo(props){return new Combo_(props)}
@@ -1578,3 +1584,65 @@ class TabPane_ extends SplitPane_{
     }
 }
 function TabPane(props){return new TabPane_(props)}
+
+class tr_ extends SmartDomElement{
+    constructor(props){
+        super("tr", props)
+    }
+}
+function tr(props){return new tr_(props)}
+
+class thead_ extends SmartDomElement{
+    constructor(props){
+        super("thead", props)
+    }
+}
+function thead(props){return new thead_(props)}
+
+class th_ extends SmartDomElement{
+    constructor(props){
+        super("th", props)
+    }
+}
+function th(props){return new th_(props)}
+
+class tbody_ extends SmartDomElement{
+    constructor(props){
+        super("tbody", props)
+    }
+}
+function tbody(props){return new tbody_(props)}
+
+class td_ extends SmartDomElement{
+    constructor(props){
+        super("td", props)
+    }
+}
+function td(props){return new td_(props)}
+
+class FormTable_ extends SmartDomElement{
+    constructor(props){
+        super("table", props)
+
+        this
+            .sa("cellpadding", this.props.cellPadding || 3)
+            .sa("cellspacing", this.props.cellSpacing || 3)
+            .bc(this.props.backgroundColor || "#eee")
+            .ffm().mar(3)
+            .a(
+            thead().a(tr().a(
+                th().html(this.props.optionNameHeader || "Option Name"),
+                th().html(this.props.optionValueHeader || "Option Value")
+            )),
+            tbody().a(
+                (this.props.options || []).map(option=>
+                    tr().a(
+                        td().html(option.props.display || option.id),
+                        td().a(option)
+                    )
+                )
+            )
+        )
+    }
+}
+function FormTable(props){return new FormTable_(props)}

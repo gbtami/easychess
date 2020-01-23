@@ -32,6 +32,7 @@ const DEFAULT_FRAME_DELAY       = 1000
 const PASSWORD_KEY              = "PASSWORD"
 
 const DEFAULT_MULTIPV           = 5
+const DEFAULT_THREADS           = 2
 
 const REMOVE_IMAGE_EXTENSION_REGEXP = /\.JPG$|\.PNG$|\.GIF$/i
 
@@ -91,13 +92,14 @@ class App extends SmartDomElement{
         this.shouldGo = true
 
         let payload = {
-            multipv: DEFAULT_MULTIPV,
+            multipv: parseInt(this.settings.multipvCombo.selected) || DEFAULT_MULTIPV,
             fen: this.board.game.fen()
         }
 
         if(this.settings.uselocalstockfishcheckbox.checked){
             this.engine.setcommand("go", payload)
         }else{
+            payload.threads = parseInt(this.settings.threadsCombo.selected) || DEFAULT_THREADS,
             api("engine:go", payload, response => {
                 this.clog(response)
             })
@@ -868,6 +870,25 @@ class App extends SmartDomElement{
                 .ae("paste", this.backupPasted.bind(this)).dropLogic(this.backupDropped.bind(this))
         )
 
+        this.settingsDiv = div().a(FormTable({
+            options: [
+                Combo({                    
+                    id: "multipvCombo",                    
+                    display: "MultiPV",                    
+                    selected: DEFAULT_MULTIPV,
+                    options: Array(20).fill(null).map((_, i) => ({value: i+1, display: i+1})),
+                    settings: this.settings
+                }),
+                Combo({                    
+                    id: "threadsCombo",                    
+                    display: "Threads",                    
+                    options: Array(10).fill(null).map((_, i) => ({value: i+1, display: i+1})),
+                    selected: DEFAULT_THREADS,
+                    settings: this.settings
+                })
+            ]
+        }))
+
         this.aboutDiv = div().mar(5).marl(20).a(div().html(md2html(PROPS.readme)))
 
         this.tabs = TabPane({id: "maintabpane"}).setTabs([
@@ -876,6 +897,7 @@ class App extends SmartDomElement{
             Tab({id: "images", caption: "Images", content: this.imageDiv}),
             Tab({id: "anims", caption: "Animations", content: this.animsDiv}),
             Tab({id: "backup", caption: "Backup", content: this.backupDiv}),            
+            Tab({id: "settings", caption: "Settings", content: this.settingsDiv}),
             Tab({id: "about", caption: "About", content: this.aboutDiv}),
             Tab({id: "auth", caption: username, content: this.authDiv}),
         ])
