@@ -5,7 +5,7 @@ const path = require('path')
 const spawn = require('child_process').spawn
 const fs = require('fs')
 const { getFiles } = require('../utils/fileutils')
-const { DAY } = require('../shared/js/commonutils')
+const { YEAR } = require('../shared/js/commonutils')
 
 passport.use(new Strategy({
         clientID: process.env.LICHESS_CLIENT_ID,
@@ -90,7 +90,7 @@ app.use(session({
     resave: true,
     saveUninitialized: true,
     cookie: {
-        maxAge: 1 * DAY
+        maxAge: 1 * YEAR
     },
     store: new FirestoreStore({
         database: firestore

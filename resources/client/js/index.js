@@ -604,7 +604,7 @@ class App extends SmartDomElement{
                 }
                 si ++
             }
-            this.alert(`Restored ${i} entrie(s), ${si} store(s), ${ki} object(s).`)
+            this.alert(`Restored ${i} localStorage item(s), ${si} indexedDB store(s), ${ki} indexedDB object(s).`)
             setTimeout(()=>document.location.reload(), 4000)
         })
     }
