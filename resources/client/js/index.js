@@ -77,7 +77,7 @@ class App extends SmartDomElement{
                 text = this.rai.asText()
                 this.board.highlightrichanalysisinfo(this.rai)
             }else{
-                text = this.storedrai.asText() + ( this.shouldGo ? "\n" + this.rai.asText() : "" )
+                text = ( this.shouldGo ? this.rai.asText() + "\n" : "" ) + this.storedrai.asText()
                 this.board.highlightrichanalysisinfo(this.storedrai)
             }
         }else if(this.raiok(this.storedrai)){

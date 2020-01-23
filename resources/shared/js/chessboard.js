@@ -1603,7 +1603,8 @@ class RichAnalysisInfo{
     }
 
     asText(){
-        return `--> ${this.isLive ? "running -->" : "stored  -->"} depth  ${this.analysisinfo.lastcompleteddepth.toString().padEnd(3, " ")} --> nps ${this.analysisinfo.nps || "0"}\n${this.analysisinfo.summary.map(item=>item.pvsans[0].padEnd(8, " ") + " " + item.scorenumerical.toString().padEnd(8, " ") + "-> " + item.pvsans.slice(1, Math.min(item.pvsans.length, 6)).join(" ")).join("\n")}`
+        let npsInfo = this.isLive ? ` --> nps ${this.analysisinfo.nps || "0"}` : ""
+        return `--> ${this.isLive ? "running -->" : "stored  -->"} depth  ${this.analysisinfo.lastcompleteddepth.toString().padEnd(3, " ") + npsInfo}\n${this.analysisinfo.summary.map(item=>item.pvsans[0].padEnd(8, " ") + " " + item.scorenumerical.toString().padEnd(8, " ") + "-> " + item.pvsans.slice(1, Math.min(item.pvsans.length, 6)).join(" ")).join("\n")}`
     }
 }
 
