@@ -17,6 +17,24 @@
     "ctime": "2020-01-23T05:54:50.666Z",
     "birthtime": "2020-01-18T07:17:45.954Z"
   },
+  "resources/shared/js/commonutils.js": {
+    "dev": 2794453477,
+    "mode": 33206,
+    "nlink": 1,
+    "uid": 0,
+    "gid": 0,
+    "rdev": 0,
+    "ino": 844424932851008,
+    "size": 313,
+    "atimeMs": 1579759937384,
+    "mtimeMs": 1579760180285.319,
+    "ctimeMs": 1579760180285.319,
+    "birthtimeMs": 1579759937384.3574,
+    "atime": "2020-01-23T06:12:17.384Z",
+    "mtime": "2020-01-23T06:16:20.285Z",
+    "ctime": "2020-01-23T06:16:20.285Z",
+    "birthtime": "2020-01-23T06:12:17.384Z"
+  },
   "resources/client/js/utils.js": {
     "dev": 2794453477,
     "mode": 33206,

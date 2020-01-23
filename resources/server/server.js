@@ -5,6 +5,7 @@ const path = require('path')
 const spawn = require('child_process').spawn
 const fs = require('fs')
 const { getFiles } = require('../utils/fileutils')
+const { DAY } = require('../shared/js/commonutils')
 
 passport.use(new Strategy({
         clientID: process.env.LICHESS_CLIENT_ID,
@@ -27,7 +28,14 @@ const app = express()
 
 app.use(require('cookie-parser')())
 app.use(require('body-parser').urlencoded({ extended: true }))
-app.use(require('express-session')({ secret: 'keyboard cat', resave: true, saveUninitialized: true }))
+app.use(require('express-session')({
+    secret: 'keyboard cat',
+    resave: true,
+    saveUninitialized: true,
+    cookie: {
+        maxAge: 1 * DAY
+    }
+}))
 app.use(passport.initialize())
 app.use(passport.session())
 

@@ -1,6 +1,7 @@
 [
     "resources/client/css/style.css",
     
+    "resources/shared/js/commonutils.js",
     "resources/client/js/utils.js",
     "resources/shared/js/chessboard.js",
     "resources/client/js/smartdom.js",
