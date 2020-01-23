@@ -10,7 +10,7 @@ const { YEAR } = require('../shared/js/commonutils')
 passport.use(new Strategy({
         clientID: process.env.LICHESS_CLIENT_ID,
         clientSecret: process.env.LICHESS_CLIENT_SECRET,
-        callbackURL: '/auth/lichess/callback'
+        callbackURL: 'https://easychess.herokuapp.com/auth/lichess/callback'
     },
     function(accessToken, refreshToken, profile, cb) {
     return cb(null, profile)
