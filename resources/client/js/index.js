@@ -1,11 +1,43 @@
+////////////////////////////////////////////////////////////////////////////////
+// config
+
 const STOCKFISH_JS_PATH = "resources/client/cdn/stockfish.wasm.js"
+const BACKUP_FETCH_URL = "https://raw.githubusercontent.com/easychessanimations/easychess/master/backup/backup.txt"
+const IMAGE_STORE_PATH = "/resources/client/img/imagestore"
+const LICHESS_LOGIN_URL = "/auth/lichess"
+
+const POSITION_CHANGED_DELAY = 500
+const ALERT_DELAY = 3000
+const REBUILD_IMAGES_DELAY = 3000
+const STORE_DEFAULT_DELAY = 1000
+const HIGHLIGHT_DRAWINGS_DELAY = 250
+const PLAY_ANIMATION_DELAY = 1000
 
 const QUERY_INTERVAL = PROPS.QUERY_INTERVAL || 3000
+
+const THUMB_SIZE = 150
+
+const GREEN_BUTTON_COLOR = "#afa"
+const BLUE_BUTTON_COLOR = "#aaf"
+const CYAN_BUTTON_COLOR = "#aff"
+const RED_BUTTON_COLOR = "#faa"
+const IDLE_BUTTON_COLOR = "#eee"
+
+const TREE_SEED = 10
+const TREE_MAX_DEPTH = 10
+
+const DEFAULT_FRAME_DELAY = 1000
+
+const REMOVE_IMAGE_EXTENSION_REGEXP = /\.JPG$|\.PNG$|\.GIF$/i
+
+const PASSWORD_KEY = "PASSWORD"
 
 const BACKUP_STORAGES = [
     "engine",
     "study"
 ]
+
+////////////////////////////////////////////////////////////////////////////////
 
 class LocalEngine extends AbstractEngine{
     constructor(sendanalysisinfo){
@@ -46,8 +78,8 @@ class App extends SmartDomElement{
         
         this.showanalysisinfo()
 
-        this.gobutton.bc(this.rai.running ? "#eee" : "#afa")
-        this.stopbutton.bc(this.rai.running ? "#faa" : "#eee")
+        this.gobutton.bc(this.rai.running ? IDLE_BUTTON_COLOR : GREEN_BUTTON_COLOR)
+        this.stopbutton.bc(this.rai.running ? RED_BUTTON_COLOR : IDLE_BUTTON_COLOR)
 
         IDB.put("engine", this.rai.analysisinfo)
     }
@@ -98,8 +130,8 @@ class App extends SmartDomElement{
 
     commentChanged(value){
         this.board.game.getcurrentnode().comment = value
-        this.doLater("storeDefault", 1000)
-        this.doLater("highlightDrawings", 250)
+        this.doLater("storeDefault", STORE_DEFAULT_DELAY)
+        this.doLater("highlightDrawings", HIGHLIGHT_DRAWINGS_DELAY)
     }
 
     buildMoves(){
@@ -135,29 +167,36 @@ class App extends SmartDomElement{
 
     buildTree(nodeOpt, rgbopt, depth, maxdepth){
         if(depth > maxdepth) return div().html("...")
+
         let def = this.board.game.getcurrentnode()
         for(let i=0;i<5;i++) if(def.getparent()) def = def.getparent()
         let node = nodeOpt || def
         let current = node.id == node.parentgame.currentnodeid
         let rgb = rgbopt || randrgb()        
         if(node.childids.length > 1) rgb = randrgb()
-        return div().ac("unselectable").mar(rgb == rgbopt ? 0 : 3).bc(rgb).dfcc().a(
-            div().w(60).cp().pad(2).bdr("solid", 3, current ? "#0f0" : "#ddd")
-            .mar(1).bc(node.gensan ? node.turn() ? "#000" : "#fff" : "#070")
-            .c(node.turn() ? "#fff" : "#000").tac()
-            .html(node.gensan ? `${node.fullmovenumber()}. ${node.gensan}` : "root").
-            ae("click", this.nodeClicked.bind(this, node)),
-            div().df().a(
-                node.sortedchilds().map((child)=>
-                    this.buildTree(child, rgb, depth + 1, maxdepth)
-                )
+
+        return div()
+            .ac("unselectable").mar(rgb == rgbopt ? 0 : 3).bc(rgb).dfcc()
+            .a(
+                div()
+                    .w(60).cp().pad(2).bdr("solid", 3, current ? "#0f0" : "#ddd")
+                    .mar(1).bc(node.gensan ? node.turn() ? "#000" : "#fff" : "#070")
+                    .c(node.turn() ? "#fff" : "#000").tac()
+                    .html(node.gensan ? `${node.fullmovenumber()}. ${node.gensan}` : "root")
+                    .ae("click", this.nodeClicked.bind(this, node)),
+                div()
+                    .df()
+                    .a(
+                        node.sortedchilds().map((child)=>
+                            this.buildTree(child, rgb, depth + 1, maxdepth)
+                    )
             )
         )        
     }
 
     showTree(){
-        seed = 10
-        this.treeDiv.x().a(this.buildTree(null, null, 0, 10))
+        seed = TREE_SEED
+        this.treeDiv.x().a(this.buildTree(null, null, 0, TREE_MAX_DEPTH))
     }
 
     storeDefault(){        
@@ -182,9 +221,9 @@ class App extends SmartDomElement{
             )
         }
 
-        this.doLater("buildMoves", 500)
-        this.doLater("showTree", 500)
-        this.doLater("buildAnimsDiv", 500)
+        this.doLater("buildMoves", POSITION_CHANGED_DELAY)
+        this.doLater("showTree", POSITION_CHANGED_DELAY)
+        this.doLater("buildAnimsDiv", POSITION_CHANGED_DELAY)
 
         this.storeDefault()
     }
@@ -252,7 +291,8 @@ class App extends SmartDomElement{
 
     alert(msg){
         this.alertDiv.show(true).html(msg)
-        setTimeout(()=>{this.alertDiv.show(false)}, 3000)
+
+        setTimeout(()=>{this.alertDiv.show(false)}, ALERT_DELAY)
     }
 
     deleteImage(name){
@@ -260,7 +300,10 @@ class App extends SmartDomElement{
     }
 
     showImages(){
-        this.imageDiv.x().a(div().marl(10).mart(6).html("Images loading ..."))
+        this.imageDiv
+            .x().a(div().marl(10).mart(6)
+            .html("Images loading ..."))
+
         IDB.getAll("image").then(result=>{
             if(result.ok){
                 this.imageDiv.x().a(
@@ -269,7 +312,7 @@ class App extends SmartDomElement{
                             div().dfcc().a(
                                 div().html(item.name),
                                 Button(`Delete ${item.name}`, this.deleteImage.bind(this, item.name)).mar(5),
-                                Img({src: item.imgsrc, width: 150, height: 150})
+                                Img({src: item.imgsrc, width: THUMB_SIZE, height: THUMB_SIZE})
                             )
                         )
                     )
@@ -282,7 +325,7 @@ class App extends SmartDomElement{
         let canvas = this.board.getCanvasByName("dragpiece")
 
         canvas.drawImageFromSrc(content, Vect(0,0)).then(()=>{                    
-            let offername = nameorig.replace(/\.JPG$|\.PNG$|\.GIF$/i, "")
+            let offername = nameorig.replace(REMOVE_IMAGE_EXTENSION_REGEXP, "")
             let name = window.prompt("Image name :", offername)
             IDB.put("image", {
                 name: name,
@@ -291,7 +334,7 @@ class App extends SmartDomElement{
                 if(result.ok){
                     this.alert(`Image ${name} stored.`)
                     this.showImages()
-                    setTimeout(function(){canvas.clear()}.bind(this), 3000)
+                    setTimeout(function(){canvas.clear()}.bind(this), REBUILD_IMAGES_DELAY)
                 }else{
                     this.alert(`Storing image ${name} failed.`)
                 }
@@ -327,7 +370,7 @@ class App extends SmartDomElement{
         g.animations = options
         g.selectedAnimation = selected
         this.buildAnimsDiv()
-        this.doLater("storeDefault", 1000)
+        this.doLater("storeDefault", STORE_DEFAULT_DELAY)
     }
 
     addSelAnimationCallback(){
@@ -375,7 +418,7 @@ class App extends SmartDomElement{
         if(task == "play"){            
             let contfunc = function(maf){
                 if(maf){                
-                    this.playtimeout = setTimeout(this.playAnimation.bind(this, "play"), 1000)
+                    this.playtimeout = setTimeout(this.playAnimation.bind(this, "play"), PLAY_ANIMATION_DELAY)
                 }                
                 else{
                     stopfunc()
@@ -443,7 +486,7 @@ class App extends SmartDomElement{
     }
 
     record(){
-        return P((resolve, reject)=>{
+        return P((resolve)=>{
             let bs = this.board.boardsize()
             let props = this.board.game.getcurrentnode().props()
 
@@ -462,7 +505,7 @@ class App extends SmartDomElement{
             let finalizefunc = function(){
                 canvas.ctx.drawImage(this.board.commentcanvas.e, bs, 0)
 
-                this.gif.addFrame(canvas.e, {delay: props.delay || 1000})
+                this.gif.addFrame(canvas.e, {delay: props.delay || DEFAULT_FRAME_DELAY})
 
                 resolve(true)
             }.bind(this)            
@@ -543,17 +586,19 @@ class App extends SmartDomElement{
                 }
             }
         }        
+
         return false
     }
 
     loginWithLichess(){
-        document.location.href = "/auth/lichess"
+        document.location.href = LICHESS_LOGIN_URL
     }
 
     createBackupBlob(){
         return P((resolve)=>{
             let obj = {
-                localStorageEntries: Object.entries(localStorage).filter(entry=> entry[0]!="PASSWORD")
+                localStorageEntries: Object.entries(localStorage)
+                    .filter(entry=> entry[0] != PASSWORD_KEY)
             }
             IDB.getAlls(BACKUP_STORAGES).then(result=>{
                 obj.indexedDB = result
@@ -571,10 +616,10 @@ class App extends SmartDomElement{
     }
 
     askPass(){
-        let storedPass = localStorage.getItem("PASSWORD")
+        let storedPass = localStorage.getItem(PASSWORD_KEY)
         if(storedPass) return storedPass
         let password = window.prompt("Password : ")
-        localStorage.setItem("PASSWORD", password)
+        localStorage.setItem(PASSWORD_KEY, password)
         return password
     }
 
@@ -605,7 +650,7 @@ class App extends SmartDomElement{
                 si ++
             }
             this.alert(`Restored ${i} localStorage item(s), ${si} indexedDB store(s), ${ki} indexedDB object(s).`)
-            setTimeout(()=>document.location.reload(), 4000)
+            setTimeout(()=>document.location.reload(), ALERT_DELAY)
         })
     }
 
@@ -616,7 +661,7 @@ class App extends SmartDomElement{
     }
 
     setPassword(){
-        localStorage.removeItem("PASSWORD")
+        localStorage.removeItem(PASSWORD_KEY)
         this.askPass()
     }
 
@@ -679,7 +724,7 @@ class App extends SmartDomElement{
     }
 
     restoreGit(){
-        fetch("https://raw.githubusercontent.com/easychessanimations/easychess/master/backup/backup.txt").then(
+        fetch(BACKUP_FETCH_URL).then(
             (response)=>response.text().then(
                 content => {
                     this.setFromBackup(content)
@@ -697,7 +742,7 @@ class App extends SmartDomElement{
     loadImagestore(){
         PROPS.imagestore.forEach(name=>IDB.get("image", name.split(".")[0]).then(result=>{
             if(!result.hasContent){
-                fetch(`/resources/client/img/imagestore/${name}`)
+                fetch(`${IMAGE_STORE_PATH}/${name}`)
                     .then(response=>response.blob())
                     .then(blob=>blobToDataURL(blob))                    
                     .then(dataUrl=>{
@@ -706,7 +751,7 @@ class App extends SmartDomElement{
                             name: name.split(".")[0],
                             imgsrc: dataUrl
                         })
-                        this.doLater("showImages", 3000)
+                        this.doLater("showImages", REBUILD_IMAGES_DELAY)
                     })
             }
         }))
@@ -716,7 +761,7 @@ class App extends SmartDomElement{
         localStorage.clear()
         indexedDB.deleteDatabase(DATABASE_NAME)
         this.alert("Cleared localStorage and indexedDB.")
-        setTimeout(()=>document.location.reload(), 3000)
+        setTimeout(()=>document.location.reload(), ALERT_DELAY)
     }
 
     commandChanged(ev){
@@ -745,15 +790,17 @@ class App extends SmartDomElement{
 
         this.mainPane = SplitPane({row: true, fitViewPort: true, headsize: this.board.boardsize()}).por(),            
 
-        this.alertDiv = div().poa().t(50).l(50).show(false).bc("#ffa")
-        .bdr("solid", 5, "#777", 10).w(600).pad(10).zi(1000).tac()
+        this.alertDiv = div()
+            .poa().t(50).l(50).show(false).bc("#ffa")
+            .bdr("solid", 5, "#777", 10).w(600).pad(10).zi(1000).tac()
 
         this.mainPane.a(this.alertDiv)
 
         this.movesDiv = div()
         this.treeDiv = div()
 
-        this.imageDiv = div().dfca().flww().dropLogic(this.imageDropped.bind(this))
+        this.imageDiv = div()
+            .dfca().flww().dropLogic(this.imageDropped.bind(this))
 
         this.authDiv = div().a(
             div().mar(5).a(                
@@ -766,7 +813,7 @@ class App extends SmartDomElement{
             this.w(width - 20).mih(height - 20)
         }.bind(this.imageDiv)
 
-        this.movesDiv.resize = function(width, height){                        
+        this.movesDiv.resize = function(){                        
             this.buildMoves()
         }.bind(this)
 
@@ -807,16 +854,16 @@ class App extends SmartDomElement{
                 .dfc().flww().w(this.board.boardsize() - 6)
                 .mar(3).marl(0).pad(3).bc("#cca")
                 .a(
-                Button("i", this.board.reset.bind(this.board)).ff("lichess").bc("#faa"),
-                Button("B", this.board.doflip.bind(this.board)).ff("lichess").bc("#aff"),
-                Button("W", this.board.tobegin.bind(this.board)).ff("lichess").bc("#aaf"),                
-                Button("Y", this.board.back.bind(this.board)).ff("lichess").bc("#afa"),
-                Button("X", this.board.forward.bind(this.board)).ff("lichess").bc("#afa"),
-                Button("V", this.board.toend.bind(this.board)).ff("lichess").bc("#aaf"),
-                Button("L", this.board.del.bind(this.board)).ff("lichess").bc("#faa"),
+                Button("i", this.board.reset.bind(this.board)).ff("lichess").bc(RED_BUTTON_COLOR),
+                Button("B", this.board.doflip.bind(this.board)).ff("lichess").bc(CYAN_BUTTON_COLOR),
+                Button("W", this.board.tobegin.bind(this.board)).ff("lichess").bc(BLUE_BUTTON_COLOR),                
+                Button("Y", this.board.back.bind(this.board)).ff("lichess").bc(GREEN_BUTTON_COLOR),
+                Button("X", this.board.forward.bind(this.board)).ff("lichess").bc(GREEN_BUTTON_COLOR),
+                Button("V", this.board.toend.bind(this.board)).ff("lichess").bc(BLUE_BUTTON_COLOR),
+                Button("L", this.board.del.bind(this.board)).ff("lichess").bc(RED_BUTTON_COLOR),
                 CheckBoxInput({id: "uselocalstockfishcheckbox", settings: this.settings}),
-                this.gobutton = Button("Go", this.go.bind(this)).bc("#afa"),
-                this.stopbutton = Button("Stop", this.stop.bind(this)).bc("#eee"),
+                this.gobutton = Button("Go", this.go.bind(this)).bc(GREEN_BUTTON_COLOR),
+                this.stopbutton = Button("Stop", this.stop.bind(this)).bc(IDLE_BUTTON_COLOR),
                 this.commandInput = TextInput().w(80).ae("keyup", this.commandChanged.bind(this),
                 )
             ),
