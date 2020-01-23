@@ -62,30 +62,52 @@ class LocalEngine extends AbstractEngine{
 }
 
 class App extends SmartDomElement{
-    raiok(){
-        if(!this.rai) return false
-        return ( this.rai.analysisinfo.analysiskey == this.board.analysiskey() )
+    raiok(rai){
+        if(!rai) return false
+        return ( rai.analysisinfo.analysiskey == this.board.analysiskey() )
     }
 
     showAnalysisinfo(){        
-        if(this.raiok()){
-            this.gametext.setValue(this.rai.asText())        
-            this.board.highlightrichanalysisinfo(this.rai)
-        }else{
-            this.gametext.setValue(`no analysis available`)        
-            this.board.clearanalysisinfo()
-        }        
+        let text = "--> no analysis available"        
+    
+        if(this.raiok(this.rai) && this.raiok(this.storedrai)){
+            if(this.storeOk()){
+                text = this.rai.asText()
+                this.board.highlightrichanalysisinfo(this.rai)
+            }else{
+                text = this.storedrai.asText() + ( this.shouldGo ? "\n" + this.rai.asText() : "" )
+                this.board.highlightrichanalysisinfo(this.storedrai)
+            }
+        }else if(this.raiok(this.storedrai)){
+            text = this.storedrai.asText()
+            this.board.highlightrichanalysisinfo(this.storedrai)
+        }else if(this.raiok(this.rai)){
+            text = this.rai.asText()
+            this.board.highlightrichanalysisinfo(this.rai)             
+        }
+
+        this.gametext.setValue(text)                
+    }
+
+    storeOk(){
+        if(!this.raiok(this.rai)) return false        
+        if(!this.raiok(this.storedrai)) return true
+        return (this.storedrai.analysisinfo.lastcompleteddepth < this.rai.analysisinfo.lastcompleteddepth)
     }
 
     processanalysisinfo(analysisinfo){
         this.rai = new RichAnalysisInfo(analysisinfo).live(true)
-        
-        this.showAnalysisinfo()
 
-        this.gobutton.bc(this.rai.running ? IDLE_BUTTON_COLOR : GREEN_BUTTON_COLOR)
-        this.stopbutton.bc(this.rai.running ? RED_BUTTON_COLOR : IDLE_BUTTON_COLOR)
+        IDB.get("engine", this.board.analysiskey()).then(result => {
+            this.storedrai = result.hasContent ? new RichAnalysisInfo(result.content) : null
 
-        IDB.put("engine", this.rai.analysisinfo)
+            this.showAnalysisinfo()
+
+            this.gobutton.bc(this.rai.running ? IDLE_BUTTON_COLOR : GREEN_BUTTON_COLOR)
+            this.stopbutton.bc(this.rai.running ? RED_BUTTON_COLOR : IDLE_BUTTON_COLOR)
+
+            if(this.storeOk()) IDB.put("engine", this.rai.analysisinfo)
+        })
     }
 
     go(){
@@ -227,8 +249,8 @@ class App extends SmartDomElement{
             this.go()
         }else{
             IDB.get("engine", this.board.analysiskey()).then(dbResult => {
-                if(dbResult.hasContent){
-                    this.rai = new RichAnalysisInfo(dbResult.content)
+                if(dbResult.hasContent){                    
+                    this.storedrai = new RichAnalysisInfo(dbResult.content)
                     this.showAnalysisinfo()
                 }
             })
@@ -935,7 +957,7 @@ class App extends SmartDomElement{
             ),
             this.gametext = TextAreaInput()
                 .w(this.board.boardsize() - 6)
-                .h(120)
+                .h(140)
         )
 
         this.mainPane.setContent(this.tabs)
