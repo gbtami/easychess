@@ -570,6 +570,19 @@ class App extends SmartDomElement{
         let finalizefunc = _ => {
             canvas.ctx.drawImage(this.board.commentcanvas.e, bs, 0)
 
+            canvas.ctx.textBaseline = "top"            
+            this.commentfontsize = bs / 12
+            this.commentmargin = this.commentfontsize / 3            
+            canvas.ctx.font = `${this.commentfontsize / 1.5}px serif`
+            canvas.ctx.fillStyle = "#00FF00"                
+
+            canvas.renderText("animation created by", bs - 2 * this.commentmargin, this.commentfontsize * 1.1, bs + this.commentmargin, bs - 2 * this.commentfontsize/1.1)
+
+            canvas.ctx.font = `${this.commentfontsize / 1.3}px serif`
+            canvas.ctx.fillStyle = "#0000FF"                
+
+            canvas.renderText("https://easychess.herokuapp.com", bs - 2 * this.commentmargin, this.commentfontsize * 1.1, bs + this.commentmargin, bs - this.commentfontsize)
+
             this.gif.addFrame(canvas.e, {delay: props.delay || DEFAULT_FRAME_DELAY})
 
             resolve(true)
