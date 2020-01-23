@@ -60,6 +60,7 @@ class Board_ extends SmartDomElement{
             lm.gameNode = this.game.getcurrentnode().sortedchilds().find(child=>child.gensan == lm.san)
             lm.gameMove = lm.gameNode ? 1 : 0
             lm.weights = lm.gameNode ? lm.gameNode.weights : [0,0]
+            lm.sortweight = lm.gameNode ? lm.gameNode.sortweight() : 0
         })
         return lms
     }

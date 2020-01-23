@@ -1,5 +1,17 @@
 const P = p => new Promise(p)
 
+function readFile(file, method){
+    return P(resolve=>{
+        let reader = new FileReader()
+
+        reader.onload = event => {          
+            resolve(event)
+        }
+
+        reader[method](file)                
+    })
+}
+
 let markdownconverter = null
 
 try{
@@ -254,9 +266,9 @@ function downloadcontent(content, name){
 }
 
 function blobToDataURL(blob) {return P(resolve => {
-    let fr = new FileReader()
-    fr.onload = ev => resolve(ev.target.result)
-    fr.readAsDataURL(blob)
+    readFile(blob, "readAsDataURL").then(ev => {
+        resolve(ev.target.result)
+    })
 })}
 
 function md2html(content){

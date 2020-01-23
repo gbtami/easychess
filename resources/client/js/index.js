@@ -66,7 +66,7 @@ class App extends SmartDomElement{
         return ( this.rai.analysisinfo.analysiskey == this.board.analysiskey() )
     }
 
-    showanalysisinfo(){        
+    showAnalysisinfo(){        
         if(this.raiok()){
             this.gametext.setValue(this.rai.asText())        
             this.board.highlightrichanalysisinfo(this.rai)
@@ -79,7 +79,7 @@ class App extends SmartDomElement{
     processanalysisinfo(analysisinfo){
         this.rai = new RichAnalysisInfo(analysisinfo).live(true)
         
-        this.showanalysisinfo()
+        this.showAnalysisinfo()
 
         this.gobutton.bc(this.rai.running ? IDLE_BUTTON_COLOR : GREEN_BUTTON_COLOR)
         this.stopbutton.bc(this.rai.running ? RED_BUTTON_COLOR : IDLE_BUTTON_COLOR)
@@ -139,7 +139,7 @@ class App extends SmartDomElement{
 
     buildMoves(){
         let lms = this.board.getlms(RICH).sort((a,b) => a.san.localeCompare(b.san))                
-        lms.sort((a,b) => ( ( b.gameMove - a.gameMove ) * 100 + ( b.weights[0] - a.weights[0] ) * 10 + ( b.weights[1] - a.weights[1] ) ))
+        lms.sort((a,b) => (b.sortweight - a.sortweight))
 
         this.movesDiv.x().ame(div().hh(this.board.boardsize()).df().a(
             div().ovfys().a(
@@ -163,7 +163,8 @@ class App extends SmartDomElement{
             this.commentTextArea = TextAreaInput({
                 text: this.board.game.getcurrentnode().comment,
                 changeCallback: this.commentChanged.bind(this)
-            }).fs(16).w(300)
+            })
+                .fs(16).w(300)
         ))
 
         this.commentTextArea.focus()
@@ -217,20 +218,18 @@ class App extends SmartDomElement{
 
     positionchanged(){
         this.rai = null
-        this.showanalysisinfo()
+        this.showAnalysisinfo()
 
         if(this.shouldGo){
             this.stop()
             this.go()
         }else{
-            IDB.get("engine", this.board.analysiskey()).then(
-                (dbResult => {
-                    if(dbResult.hasContent){
-                        this.rai = new RichAnalysisInfo(dbResult.content)
-                        this.showanalysisinfo()
-                    }
-                })
-            )
+            IDB.get("engine", this.board.analysiskey()).then(dbResult => {
+                if(dbResult.hasContent){
+                    this.rai = new RichAnalysisInfo(dbResult.content)
+                    this.showAnalysisinfo()
+                }
+            })
         }
 
         this.doLater("buildMoves", POSITION_CHANGED_DELAY)
@@ -332,10 +331,10 @@ class App extends SmartDomElement{
         })
     }
 
-    uploadimage(content, nameorig){
+    uploadImage(content, nameorig){
         let canvas = this.board.getCanvasByName("dragpiece")
 
-        canvas.drawImageFromSrc(content, Vect(0,0)).then(() => {                    
+        canvas.drawImageFromSrc(content, Vect(80, 120)).then(() => {                    
             let offername = nameorig.replace(REMOVE_IMAGE_EXTENSION_REGEXP, "")
             let name = window.prompt("Image name : ", offername)
 
@@ -356,14 +355,11 @@ class App extends SmartDomElement{
 
     dropImages(files){
         let file = files[0]
-        let reader = new FileReader()
 
-        reader.onload = event => {          
+        readFile(file, "readAsDataURL").then(event => {
             let content = event.target.result            
-            this.uploadimage(content, file.name)
-        }
-
-        reader.readAsDataURL(file)                
+            this.uploadImage(content, file.name)
+        })  
     }
 
     imageDropped(ev){
@@ -586,6 +582,7 @@ class App extends SmartDomElement{
             if(animdesc) if(animdesc.selected) if(animdesc.list) if(animdesc.list.length){
                 let selnodeid = animdesc.selected.value
                 let i = animdesc.list.findIndex(opt => opt.value == selnodeid)
+
                 if((i>=0)){
                     if(arg.task == "toend"){                        
                         i = animdesc.list.length - 1
@@ -745,14 +742,11 @@ class App extends SmartDomElement{
 
     backupDropped(ev){
         let file = ev.dataTransfer.files[0]
-        let reader = new FileReader()
-
-        reader.onload = event => {          
+        
+        readFile(file, "readAsText").then(event => {
             let content = event.target.result            
             this.setFromBackup(content)
-        }
-
-        reader.readAsText(file)
+        })
     }
 
     restoreGit(){
@@ -829,10 +823,12 @@ class App extends SmartDomElement{
         this.mainPane.a(this.alertDiv)
 
         this.movesDiv = div()
+
         this.treeDiv = div()
 
         this.imageDiv = div()
-            .dfca().flww().dropLogic(this.imageDropped.bind(this))
+            .dfca().flww().ac("unselectable")
+            .dropLogic(this.imageDropped.bind(this))
 
         this.authDiv = div().a(
             div().mar(5).a(                
