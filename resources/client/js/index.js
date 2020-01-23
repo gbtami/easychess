@@ -206,6 +206,7 @@ class App extends SmartDomElement{
     }
 
     pgnPasted(ev){
+        ev.preventDefault()
         let content = ev.clipboardData.getData('Text')        
         let moves = content.split(/ |\./).filter(item=>item.match(/^[a-zA-Z]/))        
         let game = Game().fromsans(moves)
