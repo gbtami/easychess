@@ -1,10 +1,12 @@
 const RICH = true
 
+const DEFAULT_SQUARESIZE = 60
+
 class Board_ extends SmartDomElement{
     constructor(props){
         super("div", props)
 
-        this.squaresize = this.props.squaresize || 60        
+        this.squaresize = this.props.squaresize || DEFAULT_SQUARESIZE
 
         this.squareopacity = this.props.squareopacity || 0.3
 

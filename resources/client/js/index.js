@@ -813,6 +813,7 @@ class App extends SmartDomElement{
 
         this.board = Board({
             id: "mainboard",            
+            squaresize: parseInt(getLocal("app/maintabpane/squaresizeCombo", {selected: DEFAULT_SQUARESIZE}).selected),
             positionchangedcallback: this.positionchanged.bind(this)
         })
 
@@ -889,6 +890,13 @@ class App extends SmartDomElement{
                     display: "Threads",                    
                     options: Array(10).fill(null).map((_, i) => ({value: i+1, display: i+1})),
                     selected: DEFAULT_THREADS,
+                    settings: this.settings
+                }),
+                Combo({                    
+                    id: "squaresizeCombo",                    
+                    display: "Square size",                    
+                    options: Array(11).fill(null).map((_, i) => ({value: 30 + i*5, display: 30 + i*5})),
+                    selected: DEFAULT_SQUARESIZE,
                     settings: this.settings
                 })
             ]
