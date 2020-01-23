@@ -115,7 +115,7 @@ app.get('/auth/lichess',
 app.get('/auth/lichess/callback', 
     passport.authenticate('lichess', { failureRedirect: '/login' }),
         function(req, res) {
-            res.redirect('/?login=ok')
+            res.redirect(IS_DEV() ? 'http://localhost:3000/?login=ok' : 'https://easychess.herokuapp.com/?login=ok')
         }
 )
 
