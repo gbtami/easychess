@@ -95,7 +95,7 @@ class App extends SmartDomElement{
         if(this.settings.uselocalstockfishcheckbox.checked){
             this.engine.setcommand("go", payload)
         }else{
-            api("engine:go", payload, (response)=>{
+            api("engine:go", payload, response => {
                 this.clog(response)
             })
         }
@@ -107,7 +107,7 @@ class App extends SmartDomElement{
         if(this.settings.uselocalstockfishcheckbox.checked){
             this.engine.setcommand("stop")
         }else{
-            api("engine:stop", {}, (response)=>{
+            api("engine:stop", {}, response => {
                 this.clog(response)
             })
         }        
@@ -135,19 +135,19 @@ class App extends SmartDomElement{
     }
 
     buildMoves(){
-        let lms = this.board.getlms(RICH).sort((a,b)=>a.san.localeCompare(b.san))                
-        lms.sort((a,b)=>( ( b.gameMove - a.gameMove ) * 100 + ( b.weights[0] - a.weights[0] ) * 10 + ( b.weights[1] - a.weights[1] ) ))
+        let lms = this.board.getlms(RICH).sort((a,b) => a.san.localeCompare(b.san))                
+        lms.sort((a,b) => ( ( b.gameMove - a.gameMove ) * 100 + ( b.weights[0] - a.weights[0] ) * 10 + ( b.weights[1] - a.weights[1] ) ))
         this.movesDiv.x().ame(div().hh(this.board.boardsize()).df().a(
             div().ovfys().a(
-                lms.map(lm=>div().ffm().dfc().a(                                
+                lms.map(lm => div().ffm().dfc().a(                                
                     div().cp().bc(lm.gameMove ? "#ccf" : "#eee").fw(lm.gameMove ? "bold" : "normal")
                     .pad(1).mar(1).w(60).html(lm.san)
                     .ae("click", this.moveClicked.bind(this, lm)),
-                    ([0,1].map(index=>
+                    ([0,1].map(index =>
                         Combo({
                             changeCallback: this.weightChanged.bind(this, index, lm),
                             selected: lm.gameNode ? lm.gameNode.weights[index] : 0,
-                            options: Array(11).fill(null).map((_,i)=>({value: i, display: i}))
+                            options: Array(11).fill(null).map((_,i) => ({value: i, display: i}))
                         }).mar(1)
                     )),
                 ))
@@ -187,7 +187,7 @@ class App extends SmartDomElement{
                 div()
                     .df()
                     .a(
-                        node.sortedchilds().map((child)=>
+                        node.sortedchilds().map(child =>
                             this.buildTree(child, rgb, depth + 1, maxdepth)
                     )
             )
@@ -212,7 +212,7 @@ class App extends SmartDomElement{
             this.go()
         }else{
             IDB.get("engine", this.board.analysiskey()).then(
-                (dbResult=>{
+                (dbResult => {
                     if(dbResult.hasContent){
                         this.rai = new RichAnalysisInfo(dbResult.content)
                         this.showanalysisinfo()
@@ -275,7 +275,7 @@ class App extends SmartDomElement{
     }
 
     loadStudy(study){
-        IDB.get("study", study).then(result=>{            
+        IDB.get("study", study).then(result => {            
             if(result.hasContent){                
                 this.board.setgame(Game().fromblob(result.content.game))
             }
@@ -292,11 +292,11 @@ class App extends SmartDomElement{
     alert(msg){
         this.alertDiv.show(true).html(msg)
 
-        setTimeout(()=>{this.alertDiv.show(false)}, ALERT_DELAY)
+        setTimeout(() => {this.alertDiv.show(false)}, ALERT_DELAY)
     }
 
     deleteImage(name){
-        IDB.delete("image", name).then(_=>this.showImages())
+        IDB.delete("image", name).then(_ => this.showImages())
     }
 
     showImages(){
@@ -304,10 +304,10 @@ class App extends SmartDomElement{
             .x().a(div().marl(10).mart(6)
             .html("Images loading ..."))
 
-        IDB.getAll("image").then(result=>{
+        IDB.getAll("image").then(result => {
             if(result.ok){
                 this.imageDiv.x().a(
-                    result.content.map(item=>
+                    result.content.map(item =>
                         div().mar(3).dib().pad(3).bc("#aff").a(
                             div().dfcc().a(
                                 div().html(item.name),
@@ -324,7 +324,7 @@ class App extends SmartDomElement{
     uploadimage(content, nameorig){
         let canvas = this.board.getCanvasByName("dragpiece")
 
-        canvas.drawImageFromSrc(content, Vect(0,0)).then(()=>{                    
+        canvas.drawImageFromSrc(content, Vect(0,0)).then(() => {                    
             let offername = nameorig.replace(REMOVE_IMAGE_EXTENSION_REGEXP, "")
             let name = window.prompt("Image name :", offername)
             IDB.put("image", {
@@ -485,67 +485,65 @@ class App extends SmartDomElement{
         this.animsDiv.ame()
     }
 
-    record(){
-        return P((resolve)=>{
-            let bs = this.board.boardsize()
-            let props = this.board.game.getcurrentnode().props()
+    record(){return P(resolve => {
+        let bs = this.board.boardsize()
+        let props = this.board.game.getcurrentnode().props()
 
-            let canvas = Canvas({width: 2 * bs, height: bs})
+        let canvas = Canvas({width: 2 * bs, height: bs})
 
-            canvas.fillStyle("#FFFFFF")
-            canvas.fillRect(Vect(0,0), Vect(2*bs,bs))
-            
-            canvas.ctx.drawImage(this.board.getCanvasByName("background").e, 0, 0)
-            canvas.ctx.globalAlpha = 0.3
-            canvas.ctx.drawImage(this.board.getCanvasByName("square").e, 0, 0)
-            canvas.ctx.globalAlpha = 1
-            canvas.ctx.drawImage(this.board.getCanvasByName("piece").e, 0, 0)
-            canvas.ctx.drawImage(this.board.getCanvasByName("drawings").e, 0, 0)
+        canvas.fillStyle("#FFFFFF")
+        canvas.fillRect(Vect(0,0), Vect(2*bs,bs))
+        
+        canvas.ctx.drawImage(this.board.getCanvasByName("background").e, 0, 0)
+        canvas.ctx.globalAlpha = 0.3
+        canvas.ctx.drawImage(this.board.getCanvasByName("square").e, 0, 0)
+        canvas.ctx.globalAlpha = 1
+        canvas.ctx.drawImage(this.board.getCanvasByName("piece").e, 0, 0)
+        canvas.ctx.drawImage(this.board.getCanvasByName("drawings").e, 0, 0)
 
-            let finalizefunc = function(){
-                canvas.ctx.drawImage(this.board.commentcanvas.e, bs, 0)
+        let finalizefunc = function(){
+            canvas.ctx.drawImage(this.board.commentcanvas.e, bs, 0)
 
-                this.gif.addFrame(canvas.e, {delay: props.delay || DEFAULT_FRAME_DELAY})
+            this.gif.addFrame(canvas.e, {delay: props.delay || DEFAULT_FRAME_DELAY})
 
-                resolve(true)
-            }.bind(this)            
+            resolve(true)
+        }.bind(this)            
 
-            let drawings = this.board.game.getcurrentnode().drawings()
+        let drawings = this.board.game.getcurrentnode().drawings()
 
-            let imageName = null
-            let drawing = null
-            for(let drw of drawings){
-                if(drw.kind == "image"){                    
-                    imageName = drw.name
-                    drawing = drw                    
-                    break
-                }
+        let imageName = null
+        let drawing = null
+        for(let drw of drawings){
+            if(drw.kind == "image"){                    
+                imageName = drw.name
+                drawing = drw                    
+                break
             }
+        }
 
-            if(imageName){
-                IDB.get("image", imageName).then(
-                    result=>{
-                        if(result.hasContent){
-                            canvas.ctx.globalAlpha = drawing.opacity / 9
+        if(imageName){
+            IDB.get("image", imageName).then(
+                result => {
+                    if(result.hasContent){
+                        canvas.ctx.globalAlpha = drawing.opacity / 9
 
-                            let ds = bs * drawing.thickness / 9
-                            let dm = ( bs - ds ) / 2
+                        let ds = bs * drawing.thickness / 9
+                        let dm = ( bs - ds ) / 2
 
-                            canvas.drawImageFromSrc(result.content.imgsrc, Vect(bs + dm, dm), Vect(ds, ds)).then(result=>{
-                                canvas.ctx.globalAlpha = 1
-                                finalizefunc()
-                            })                            
-                        }else{
+                        canvas.drawImageFromSrc(result.content.imgsrc, Vect(bs + dm, dm), Vect(ds, ds)).then(_ => {
+                            canvas.ctx.globalAlpha = 1
                             finalizefunc()
-                        }
-                    },
-                    _=>finalizefunc()
-                )
-            }else{
-                finalizefunc()
-            }
-        })        
-    }
+                        })                            
+                    }else{
+                        finalizefunc()
+                    }
+                },
+                _ => finalizefunc()
+            )
+        }else{
+            finalizefunc()
+        }
+    })}
 
     render(){
         this.gif.render()
@@ -562,7 +560,7 @@ class App extends SmartDomElement{
 
             if(animdesc) if(animdesc.selected) if(animdesc.list) if(animdesc.list.length){
                 let selnodeid = animdesc.selected.value
-                let i = animdesc.list.findIndex(opt=>opt.value == selnodeid)
+                let i = animdesc.list.findIndex(opt => opt.value == selnodeid)
                 if((i>=0)){
                     if(arg.task == "toend"){                        
                         i = animdesc.list.length - 1
@@ -594,26 +592,22 @@ class App extends SmartDomElement{
         document.location.href = LICHESS_LOGIN_URL
     }
 
-    createBackupBlob(){
-        return P((resolve)=>{
-            let obj = {
-                localStorageEntries: Object.entries(localStorage)
-                    .filter(entry=> entry[0] != PASSWORD_KEY)
-            }
-            IDB.getAlls(BACKUP_STORAGES).then(result=>{
-                obj.indexedDB = result
-                resolve(obj)
-            })
+    createBackupBlob(){return P(resolve => {
+        let obj = {
+            localStorageEntries: Object.entries(localStorage)
+                .filter(entry => entry[0] != PASSWORD_KEY)
+        }
+        IDB.getAlls(BACKUP_STORAGES).then(result => {
+            obj.indexedDB = result
+            resolve(obj)
         })
-    }
+    })}
 
-    createZippedBackup(){
-        return P(resolve=>{
+    createZippedBackup(){return P(resolve => {
             this.createBackupBlob().then(blob=>{
                 resolve(createZip(JSON.stringify(blob)))
             })
-        })
-    }
+    })}
 
     askPass(){
         let storedPass = localStorage.getItem(PASSWORD_KEY)
@@ -625,12 +619,12 @@ class App extends SmartDomElement{
 
     showBackup(){
         this.createZippedBackup().then(
-            content=>this.backupTextArea.setCopy(content)
+            content => this.backupTextArea.setCopy(content)
         )
     }
 
     setFromBackup(content){
-        unZip(content).then(blobstr=>{
+        unZip(content).then(blobstr => {
             let blob = JSON.parse(blobstr)
             let i = 0
             for(let entry of blob.localStorageEntries){
@@ -650,7 +644,7 @@ class App extends SmartDomElement{
                 si ++
             }
             this.alert(`Restored ${i} localStorage item(s), ${si} indexedDB store(s), ${ki} indexedDB object(s).`)
-            setTimeout(()=>document.location.reload(), ALERT_DELAY)
+            setTimeout(() => document.location.reload(), ALERT_DELAY)
         })
     }
 
@@ -666,11 +660,11 @@ class App extends SmartDomElement{
     }
 
     backupRemote(){
-        this.createZippedBackup().then(content=>
+        this.createZippedBackup().then(content =>
             api("bucket:put", {
                 content: content,
                 password: this.askPass()
-            }, response=> {
+            }, response => {
                 if(response.ok){
                     this.alert(`Backup done. Size ${response.apiResponse.size}`)
                 }else{
@@ -683,7 +677,7 @@ class App extends SmartDomElement{
     restoreRemote(){
         api("bucket:get", {
             password: this.askPass()
-        }, response=>{
+        }, response => {
             if(response.ok){
                 this.setFromBackup(response.content)
             }
@@ -691,17 +685,17 @@ class App extends SmartDomElement{
     }
 
     backupLocal(){
-        this.createZippedBackup().then(content=>{
+        this.createZippedBackup().then(content => {
             downloadcontent(content)
         })
     }
 
     backupGit(){
-        this.createZippedBackup().then(content=>{
+        this.createZippedBackup().then(content => {
             api("git:put", {
                 content: content,
                 password: this.askPass()
-            }, response=> {
+            }, response => {
                 if(response.ok){
                     this.alert(`Uploaded to git.`)
                 }else{
@@ -715,7 +709,7 @@ class App extends SmartDomElement{
         let file = ev.dataTransfer.files[0]
         let reader = new FileReader()
 
-        reader.onload = event=> {          
+        reader.onload = event => {          
             let content = event.target.result            
             this.setFromBackup(content)
         }
@@ -725,27 +719,27 @@ class App extends SmartDomElement{
 
     restoreGit(){
         fetch(BACKUP_FETCH_URL).then(
-            (response)=>response.text().then(
+            response => response.text().then(
                 content => {
                     this.setFromBackup(content)
                 },
-                err => {                                        
+                _ => {                                        
                     this.alert("Error: Response content could not be obtained.")
                 }
             ),
-            err => {                
+            _ => {                
                 this.alert("Error: Fetch failed.")
             }
         )
     }
 
     loadImagestore(){
-        PROPS.imagestore.forEach(name=>IDB.get("image", name.split(".")[0]).then(result=>{
+        PROPS.imagestore.forEach(name => IDB.get("image", name.split(".")[0]).then(result => {
             if(!result.hasContent){
                 fetch(`${IMAGE_STORE_PATH}/${name}`)
-                    .then(response=>response.blob())
-                    .then(blob=>blobToDataURL(blob))                    
-                    .then(dataUrl=>{
+                    .then(response => response.blob())
+                    .then(blob => blobToDataURL(blob))                    
+                    .then(dataUrl => {
                         this.clog(`storing fetched image ${name}`)
                         IDB.put("image", {
                             name: name.split(".")[0],
@@ -761,7 +755,7 @@ class App extends SmartDomElement{
         localStorage.clear()
         indexedDB.deleteDatabase(DATABASE_NAME)
         this.alert("Cleared localStorage and indexedDB.")
-        setTimeout(()=>document.location.reload(), ALERT_DELAY)
+        setTimeout(() => document.location.reload(), ALERT_DELAY)
     }
 
     commandChanged(ev){

@@ -129,7 +129,7 @@ class SmartDomElement{
     }
 
     pathList(allowNonId){
-        return this.idParentChain(allowNonId).map(ip=>ip.id ? ip.id : ip.pathId)
+        return this.idParentChain(allowNonId).map(ip => ip.id ? ip.id : ip.pathId)
     }
 
     path(allowNonId){
@@ -356,7 +356,7 @@ class Slider_ extends SmartDomElement{
     textChanged(){
         let m = this.text.value().match(/([\d]+)[^\d]+([\d]+)[^\d]+([\d]+)[^\d]+([\d]+)/)
         if(m){            
-            [ this.state.value, this.state.min, this.state.max, this.state.step ] = m.slice(1,5).map(x=>parseInt(x));            
+            [ this.state.value, this.state.min, this.state.max, this.state.step ] = m.slice(1,5).map(x => parseInt(x));            
         }        
         this.doLater("setFromState", 2000)
     }
@@ -413,7 +413,7 @@ class TextAreaInput_ extends SmartDomElement{
     setCopy(content){
         this.setValue(content).focus().select()
         document.execCommand("copy")
-        setTimeout(()=>this.focus().select(), 50)
+        setTimeout(() => this.focus().select(), 50)
     }
 
     init(){        
@@ -587,7 +587,7 @@ class Combo_ extends SmartDomElement{
     init(){        
         this.ae("change", this.change.bind(this))        
         this.ame(
-            this.props.options.map(option=>(
+            this.props.options.map(option => (
                 ComboOption({value: option.value, display: option.display, selected: option.value == this.props.selected})
             ))
         )
@@ -909,7 +909,7 @@ class MultipleSelect_ extends SmartDomElement{
     }
 
     findOptionByValue(value){
-        return this.state.options.find(option=>option.value == value)
+        return this.state.options.find(option => option.value == value)
     }
 
     addOption(){
@@ -926,13 +926,13 @@ class MultipleSelect_ extends SmartDomElement{
     }
 
     delOption(option){
-        this.state.options = this.state.options.filter(opt=>opt.value != option.value)
+        this.state.options = this.state.options.filter(opt => opt.value != option.value)
         this.build()
         this.storeState()
     }
 
     calcSelected(){
-        this.state.selected = this.state.options.filter(option=>getLocal(this.path() + "/" + option.value, {}).checked)        
+        this.state.selected = this.state.options.filter(option => getLocal(this.path() + "/" + option.value, {}).checked)        
     }
 
     selectedChanged(checked, id){
@@ -955,7 +955,7 @@ class MultipleSelect_ extends SmartDomElement{
 
         this.checkBoxInputs = {}
 
-        this.ame(this.state.options.map(option=>
+        this.ame(this.state.options.map(option =>
             div().bc("#bbb").mar(2).dib().a(
                 div().dfc().a(
                     div().mar(2).pad(2).bc("#ddf").html(option.display),
@@ -1117,7 +1117,7 @@ class EditableList_ extends SmartDomElement{
     }
 
     delOption(option){
-        this.state.options = this.state.options.filter(opt=>opt.value != option.value)
+        this.state.options = this.state.options.filter(opt => opt.value != option.value)
         if(this.state.options.length) this.state.selected = this.state.options[0]
         else this.state.selected = null
         this.buildOptions()
@@ -1147,8 +1147,8 @@ class EditableList_ extends SmartDomElement{
                     break
                 case "drop":                               
                     let dropOption = sev.e.props.option
-                    let i = this.state.options.findIndex(opt=>opt.value == this.draggedOption.value)
-                    let j = this.state.options.findIndex(opt=>opt.value == dropOption.value)                    
+                    let i = this.state.options.findIndex(opt => opt.value == this.draggedOption.value)
+                    let j = this.state.options.findIndex(opt => opt.value == dropOption.value)                    
                     this.state.options.itoj(i,j)                    
                     this.buildOptions()
                     this.storeState()
@@ -1166,7 +1166,7 @@ class EditableList_ extends SmartDomElement{
 
         if(!this.state.options.length) this.state.selected = null
         
-        this.optionsDiv.x().ame(this.state.options.map(option=>
+        this.optionsDiv.x().ame(this.state.options.map(option =>
             OptionElement({option: option})
         ))       
 
@@ -1187,7 +1187,7 @@ class EditableList_ extends SmartDomElement{
     }
 
     findOptionByValue(value){
-        return this.state.options.find(option=>option.value == value)
+        return this.state.options.find(option => option.value == value)
     }
 
     addOption(){
@@ -1371,33 +1371,29 @@ class Canvas_ extends SmartDomElement{
         return dt
     }
 
-    loadBackgroundImage(url){
-        return P((resolve, _)=>{
-            let bimg = Img()
-            bimg.ae("load", ()=>{
-                let mulx = Math.floor(this.width / bimg.naturalWidth) + 1
-                let muly = Math.floor(this.height / bimg.naturalHeight) + 1                
-                for(let x = 0; x < mulx; x++) for(let y = 0; y < muly; y++){
-                    this.ctx.drawImage(bimg.e, x * bimg.naturalWidth, y * bimg.naturalHeight)
-                }
-                resolve(true)
-            })
-            bimg.src = url
+    loadBackgroundImage(url){return P(resolve => {
+        let bimg = Img()
+        bimg.ae("load", () => {
+            let mulx = Math.floor(this.width / bimg.naturalWidth) + 1
+            let muly = Math.floor(this.height / bimg.naturalHeight) + 1                
+            for(let x = 0; x < mulx; x++) for(let y = 0; y < muly; y++){
+                this.ctx.drawImage(bimg.e, x * bimg.naturalWidth, y * bimg.naturalHeight)
+            }
+            resolve(true)
         })
-    }
+        bimg.src = url
+    })}
 
-    drawImageFromSrc(src, orig, sizeOpt){        
-        return P((resolve, _)=>{
-            let img = Img()
-            img.ae("load", ()=>{         
-                let size = sizeOpt || Vect(img.naturalWidth, img.naturalHeight)       
-                this.ctx.drawImage(img.e, orig.x, orig.y, size.x, size.y)
+    drawImageFromSrc(src, orig, sizeOpt){return P(resolve => {
+        let img = Img()
+        img.ae("load", () => {         
+            let size = sizeOpt || Vect(img.naturalWidth, img.naturalHeight)       
+            this.ctx.drawImage(img.e, orig.x, orig.y, size.x, size.y)
 
-                resolve(true)
-            })
-            img.src = src
+            resolve(true)
         })
-    }
+        img.src = src
+    })}
 }
 function Canvas(props){return new Canvas_(props)}
 
@@ -1550,8 +1546,8 @@ class TabPane_ extends SplitPane_{
     }
 
     build(skipBody){
-        this.headDiv.x().a(this.tabs.map(tab=>tab.selected(tab == this.selected)))
-        if(!skipBody) this.bodyDiv.x().a(this.tabs.map(tab=>tab.content.poa().show(tab == this.selected)))        
+        this.headDiv.x().a(this.tabs.map(tab => tab.selected(tab == this.selected)))
+        if(!skipBody) this.bodyDiv.x().a(this.tabs.map(tab => tab.content.poa().show(tab == this.selected)))        
         if(this.selected){
             let f = this.selected.content.resize
             try{                
@@ -1572,7 +1568,7 @@ class TabPane_ extends SplitPane_{
     }
 
     findTabById(id){
-        return this.tabs.find(tab=>tab.id == id)
+        return this.tabs.find(tab => tab.id == id)
     }
 
     init(){                

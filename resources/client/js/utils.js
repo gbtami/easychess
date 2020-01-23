@@ -29,16 +29,16 @@ function cloneObject(obj){
 
 function simpleFetch(url, params, callback){
     fetch(url, params).then(
-        (response)=>response.text().then(
-            (text)=>{                
+        response => response.text().then(
+            text => {                
                 callback({ok: true, content: text})
             },
-            (err)=>{
+            err => {
                 console.log("get response text error", err)
                 callback({ok: false, status: "Error: failed to get response text."})
             }
         ),
-        (err)=>{
+        err => {
             console.log("fetch error", err)
             callback({ok: false, status: "Error: failed to fetch."})
         }
@@ -56,8 +56,8 @@ function api(topic, payload, callback){
             payload: payload
         })
     }).then(
-        (response)=>response.text().then(
-            (text)=>{
+        response => response.text().then(
+            text => {
                 try{                    
                     let response = JSON.parse(text)
                     callback(response)
@@ -66,12 +66,12 @@ function api(topic, payload, callback){
                     callback({error: "Error: Could not parse response JSON."})
                 }                
             },
-            (err)=>{
+            err => {
                 console.log("api error", err)
                 callback({error: "Error: API error in get response text."})
             }
         ),
-        (err)=>{
+        err => {
             console.log("api error", err)
             callback({error: "Error: API error in fetch."})
         }
@@ -96,7 +96,7 @@ class NdjsonReader{
 
     read(){
         this.reader.read().then(
-            (chunk)=>{
+            chunk => {
                 if(chunk.done){
                     return
                 }
@@ -116,7 +116,7 @@ class NdjsonReader{
                     this.pendingChunk += content
                 }
             },
-            err=>{
+            err => {
                 console.log(err)
             }
         )
@@ -128,12 +128,12 @@ class NdjsonReader{
                 "Accept": "application/x-ndjson"
             }            
         }).then(
-            response=>{        
+            response => {        
                 this.pendingChunk = ""
                 this.reader = response.body.getReader()
                 this.read()        
             },
-            err=>{
+            err => {
                 console.log(err)
             }
         )
@@ -233,9 +233,9 @@ function unZip(content, nameOpt){
     
     let unzip = new JSZip()            
 
-    return P((resolve, reject)=>{
-        unzip.loadAsync(content, {base64: true}).then(unzip=>
-            unzip.file(name).async("text").then(content=> resolve(content)))
+    return P(resolve => {
+        unzip.loadAsync(content, {base64: true}).then(unzip =>
+            unzip.file(name).async("text").then(content => resolve(content)))
     })        
 }
 
@@ -253,13 +253,11 @@ function downloadcontent(content, name){
     }, 0)
 }
 
-function blobToDataURL(blob) {
-    return P((resolve, _)=>{
-        let fr = new FileReader()
-        fr.onload = ev => resolve(ev.target.result)
-        fr.readAsDataURL(blob)
-    })
-}
+function blobToDataURL(blob) {return P(resolve => {
+    let fr = new FileReader()
+    fr.onload = ev => resolve(ev.target.result)
+    fr.readAsDataURL(blob)
+})}
 
 function md2html(content){
     let html = markdownconverter.makeHtml(content)
