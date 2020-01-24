@@ -155,7 +155,7 @@ class App extends SmartDomElement{
 
     weightChanged(index, lm, value){        
         this.board.game.makemove(lm)
-        this.getcurrentnode().weights[index] = value
+        this.getcurrentnode().weights[index] = parseInt(value)
         this.board.game.back()        
         this.positionchanged()
     }
@@ -221,6 +221,42 @@ class App extends SmartDomElement{
         })
     }
 
+    deleteLegalMove(lm){        
+        this.board.makeMove(lm)
+        this.board.del()
+    }
+
+    addLegalMove(lm, i, ev){        
+        this.board.makeMove(lm)
+        if(i < 0) this.getcurrentnode().weights = [0, 0]
+        else{
+            this.getcurrentnode().weights[i] = 5        
+            this.getcurrentnode().weights[1 - i] = 0
+        }
+        if(ev.button) this.board.back()
+    }
+
+    createNodeForLegalMove(lm){
+        return div().ffm().dfc().a(                                
+            div()
+                .cp().bc(lm.gameMove ? movecolor(lm.gameNode.weights) : "#eee")
+                .fw(lm.gameMove ? "bold" : "normal")
+                .pad(1).mar(1).w(60).html(lm.san)
+                .ae("click", this.moveClicked.bind(this, lm)),
+            [0,1].map(index =>
+                Combo({
+                    changeCallback: this.weightChanged.bind(this, index, lm),
+                    selected: lm.gameNode ? lm.gameNode.weights[index] : 0,
+                    options: Array(11).fill(null).map((_,i) => ({value: i, display: i}))
+                }).mar(1)
+            ),
+            Button("me", this.addLegalMove.bind(this, lm, 0)).bc(GREEN_BUTTON_COLOR).fs(10),
+            Button("opp", this.addLegalMove.bind(this, lm, 1)).bc(YELLOW_BUTTON_COLOR).fs(10),
+            Button("n", this.addLegalMove.bind(this, lm, -1)).bc(IDLE_BUTTON_COLOR).fs(10),
+            Button("X", this.deleteLegalMove.bind(this, lm)).bc(RED_BUTTON_COLOR).fs(10)
+        )
+    }
+
     buildMoves(){
         let lms = this.board.getlms(RICH).sort((a,b) => a.san.localeCompare(b.san))                
         lms.sort((a,b) => (b.sortweight - a.sortweight))
@@ -228,22 +264,7 @@ class App extends SmartDomElement{
         this.movesDiv.x().ame(
             div().hh(this.board.boardsize() - 5).df().a(
                 div().ovfys().a(
-                    lms.map(lm => div()
-                        .ffm().dfc()
-                        .a(                                
-                            div()
-                                .cp().bc(lm.gameMove ? "#ccf" : "#eee")
-                                .fw(lm.gameMove ? "bold" : "normal")
-                                .pad(1).mar(1).w(60).html(lm.san)
-                                .ae("click", this.moveClicked.bind(this, lm)),
-                            ([0,1].map(index =>
-                                Combo({
-                                    changeCallback: this.weightChanged.bind(this, index, lm),
-                                    selected: lm.gameNode ? lm.gameNode.weights[index] : 0,
-                                    options: Array(11).fill(null).map((_,i) => ({value: i, display: i}))
-                                }).mar(1)
-                        )),
-                    ))
+                    lms.map(lm => this.createNodeForLegalMove(lm))
                 ),
                 this.analysisinfoDiv,
                 this.commentTextArea = TextAreaInput({
@@ -252,7 +273,7 @@ class App extends SmartDomElement{
                 })
                     .fs(16).w(300),            
             ),
-            this.pgnText = TextAreaInput().mart(4).w(760).h(GAMETEXT_HEIGHT).ae("paste", this.pgnPasted.bind(this))
+            this.pgnText = TextAreaInput().mart(4).w(838).h(GAMETEXT_HEIGHT).ae("paste", this.pgnPasted.bind(this))
             )
 
         this.pgnText.setValue(this.board.game.pgn())
@@ -797,8 +818,7 @@ class App extends SmartDomElement{
             let ki = 0                
 
             for(let store in blob.indexedDB){                                
-                for(let obj of blob.indexedDB[store].content){                    
-                    console.log(store, obj);
+                for(let obj of blob.indexedDB[store].content){                                        
                     (async function(){
                         await IDB.put(store, obj)
                     })()
@@ -963,7 +983,7 @@ class App extends SmartDomElement{
 
         this.movesDiv = div()
 
-        this.analysisinfoDiv = div().w(300).ovfs()
+        this.analysisinfoDiv = div().w(260).ovfs()
 
         this.treeDiv = div()
 

@@ -35,7 +35,7 @@ class Board_ extends SmartDomElement{
     init(){
         this.x()
 
-        this.canvases = this.canvasnames.map(cn=>
+        this.canvases = this.canvasnames.map(cn =>
             Canvas({width: this.boardsize(), height: this.boardsize()}).poa()
         )
 
@@ -67,10 +67,10 @@ class Board_ extends SmartDomElement{
 
         if(RICH) lms.forEach(lm => {
             lm.san = this.game.board.movetosan(lm)
-            lm.gameNode = this.getcurrentnode().sortedchilds().find(child=>child.gensan == lm.san)
+            lm.gameNode = this.getcurrentnode().sortedchilds().find(child => child.gensan == lm.san)
             lm.gameMove = lm.gameNode ? 1 : 0
             lm.weights = lm.gameNode ? lm.gameNode.weights : [0, 0]
-            lm.sortweight = lm.gameNode ? 100 + lm.gameNode.sortweight() : 0
+            lm.sortweight = lm.gameNode ? 100 + lm.gameNode.sortweight() : 0            
         })
 
         return lms
@@ -118,7 +118,7 @@ class Board_ extends SmartDomElement{
             
                         let move = Move(this.draggedsq, this.dragtargetsq)
                         
-                        let valid = this.getlms().find((testmove)=>testmove.roughlyequalto(move))
+                        let valid = this.getlms().find((testmove) => testmove.roughlyequalto(move))
 
                         if(valid){
                             this.makeMove(valid)
@@ -173,7 +173,7 @@ class Board_ extends SmartDomElement{
     }
 
     getCanvasByName(name){
-        return this.canvases[this.canvasnames.findIndex(canvasName=>name == canvasName)]
+        return this.canvases[this.canvasnames.findIndex(canvasName => name == canvasName)]
     }
 
     drawSquares(){        
@@ -210,7 +210,7 @@ class Board_ extends SmartDomElement{
             let newimgurl = imgurlparts[0] + "," + newsvgb64            
             let img = Img({width: this.piecesize(), height: this.piecesize()})                            
             let fen = this.game.fen()
-            img.e.onload = ()=>{
+            img.e.onload = () => {
                 if(this.game.fen() == fen){
                     canvas.ctx.drawImage(img.e, coords.x, coords.y, this.piecesize(), this.piecesize())
                 }                
@@ -394,7 +394,7 @@ class Board_ extends SmartDomElement{
         let b = this.game.board
         for(let drawing of drawings){                     
             try{
-                let squares = drawing.squares.map(algeb=>this.fasq(b.algebtosquare(algeb)))
+                let squares = drawing.squares.map(algeb => this.fasq(b.algebtosquare(algeb)))
                 switch(drawing.kind){
                     case "circle":                                        
                         for(let sq of squares){                            

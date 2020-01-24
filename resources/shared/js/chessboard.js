@@ -877,7 +877,7 @@ class GameNode_{
         this.fen = blob.fen
         this.childids = blob.childids || []
         this.parentid = blob.parentid || null
-        this.weights = blob.weights || [0, 0]
+        this.weights = ( blob.weights || [0, 0] ).map(w => parseInt(w))
         this.error = blob.error
         this.priority = 0
         this.comment = blob.comment || ""

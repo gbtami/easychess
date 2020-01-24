@@ -291,3 +291,17 @@ function md2html(content){
     html = html.replace(/<a href=/g, `<a rel="noopener noreferrer" target="_blank" href=`)
     return html
 }
+
+const MOVE_COLOR_PRESETS = {
+    "0,0": "#99f",
+    "0,1": "#f00"
+}
+
+function movecolor(weights){
+    let presetkey = `${weights[0]},${weights[1]}`
+    let preset = MOVE_COLOR_PRESETS[presetkey]
+    if(preset){
+        return preset
+    }
+    return `rgb(${weights[1] ? 255 - weights[1]/10*255 : 0},${(160+weights[0]/10*95)*(weights[1] > 0 ? 0.7 : 1)},0)`
+}

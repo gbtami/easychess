@@ -319,7 +319,7 @@ class Button_ extends button_{
     constructor(caption, callback, props){
         super("button", props)
         this.html(caption)
-        if(callback) this.ae("click", callback)
+        if(callback) this.ae("click mousedown", callback)
     }
 }
 function Button(caption, callback){return new Button_(caption, callback)}
