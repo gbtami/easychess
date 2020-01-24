@@ -365,12 +365,30 @@ class Board_ extends SmartDomElement{
         }
     }
 
+    highlightWeights(){
+        let currentnode = this.getcurrentnode()
+        let weightscanvas = this.getCanvasByName("weights")
+        weightscanvas.clear()                
+        for(let child of currentnode.sortedchilds()){
+            let move = this.game.board.movefromalgeb(child.genalgeb)
+            this.drawmovearrow(weightscanvas, move, {
+                scalefactor: this.arrowscalefactor(),
+                auxscalefactor: 1.2,
+                color: "#00f",
+                opacity: child.weights[0] / 10
+            })
+        }
+    }
+
+
     draw(){
         this.getCanvasByName("dragpiece").clear()
 
         this.drawSquares()
 
         this.highlightLastMove()
+
+        this.highlightWeights()
 
         this.drawPieces()
 
