@@ -149,8 +149,9 @@ class App extends SmartDomElement{
         }        
     }
 
-    moveClicked(lm){
+    moveClicked(lm, ev){
         this.board.makeMove(lm)
+        if(ev.button) this.board.back()
     }
 
     weightChanged(index, lm, value){        
