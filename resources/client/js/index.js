@@ -20,7 +20,7 @@ const PLAY_ANIMATION_DELAY      = 1000
 
 const QUERY_INTERVAL            = PROPS.QUERY_INTERVAL || 3000
 
-const GAMETEXT_HEIGHT           = 130
+const GAMETEXT_HEIGHT           = 120
 const THUMB_SIZE                = 150
 
 const GREEN_BUTTON_COLOR        = "#afa"
@@ -155,7 +155,7 @@ class App extends SmartDomElement{
 
     weightChanged(index, lm, value){        
         this.board.game.makemove(lm)
-        this.board.game.getcurrentnode().weights[index] = value
+        this.getcurrentnode().weights[index] = value
         this.board.game.back()        
         this.positionchanged()
     }
@@ -165,7 +165,7 @@ class App extends SmartDomElement{
     }
 
     commentChanged(value){
-        this.board.game.getcurrentnode().comment = value
+        this.getcurrentnode().comment = value
         this.doLater("storeDefault", STORE_DEFAULT_DELAY)
         this.doLater("highlightDrawings", HIGHLIGHT_DRAWINGS_DELAY)
     }
@@ -247,7 +247,7 @@ class App extends SmartDomElement{
                 ),
                 this.analysisinfoDiv,
                 this.commentTextArea = TextAreaInput({
-                    text: this.board.game.getcurrentnode().comment,
+                    text: this.getcurrentnode().comment,
                     changeCallback: this.commentChanged.bind(this)
                 })
                     .fs(16).w(300),            
@@ -284,7 +284,7 @@ class App extends SmartDomElement{
     buildTree(nodeOpt, rgbopt, depth, maxdepth){
         if(depth > maxdepth) return div().html("...")
 
-        let def = this.board.game.getcurrentnode()
+        let def = this.getcurrentnode()
         for(let i = 0; i < TREE_BACKWARD_DEPTH; i++) if(def.getparent()) def = def.getparent()
         let node = nodeOpt || def
         let current = node.id == node.parentgame.currentnodeid
@@ -429,7 +429,8 @@ class App extends SmartDomElement{
                         div().mar(3).dib().pad(3).bc("#aff").a(
                             div().dfcc().a(
                                 div().html(item.name),
-                                Button(`Delete ${item.name}`, this.deleteImage.bind(this, item.name)).mar(5),
+                                Button(`Add to frame`, this.addImageToFrame.bind(this, item.name)).bc(GREEN_BUTTON_COLOR),
+                                Button(`Delete ${item.name}`, this.deleteImage.bind(this, item.name)).bc(RED_BUTTON_COLOR),
                                 Img({src: item.imgsrc, width: THUMB_SIZE, height: THUMB_SIZE})
                             )
                         )
@@ -437,6 +438,15 @@ class App extends SmartDomElement{
                 )
             }
         })
+    }
+
+    getcurrentnode(){
+        return this.board.getcurrentnode()
+    }
+
+    addImageToFrame(name){
+        this.getcurrentnode().addImageToComment(name, 10000)
+        this.positionchanged()
     }
 
     uploadImage(content, nameorig){
@@ -616,7 +626,7 @@ class App extends SmartDomElement{
 
     record(){return P(resolve => {
         let bs = this.board.boardsize()
-        let props = this.board.game.getcurrentnode().props()
+        let props = this.getcurrentnode().props()
 
         let canvas = Canvas({width: 2 * bs, height: bs})
 
@@ -627,6 +637,8 @@ class App extends SmartDomElement{
         canvas.ctx.globalAlpha = 0.3
         canvas.ctx.drawImage(this.board.getCanvasByName("square").e, 0, 0)
         canvas.ctx.globalAlpha = 1
+        if(this.settings.highlightanimationmovesCheckbox.checked)
+            canvas.ctx.drawImage(this.board.getCanvasByName("highlight").e, 0, 0)
         canvas.ctx.drawImage(this.board.getCanvasByName("piece").e, 0, 0)
         canvas.ctx.drawImage(this.board.getCanvasByName("drawings").e, 0, 0)
 
@@ -651,7 +663,7 @@ class App extends SmartDomElement{
             resolve(true)
         }
 
-        let drawings = this.board.game.getcurrentnode().drawings()
+        let drawings = this.getcurrentnode().drawings()
 
         let imageName = null
         let drawing = null
@@ -1028,6 +1040,11 @@ class App extends SmartDomElement{
                     display: "Threads",                    
                     options: Array(10).fill(null).map((_, i) => ({value: i+1, display: i+1})),
                     selected: DEFAULT_THREADS,
+                    settings: this.settings
+                }),
+                CheckBoxInput({
+                    id: "highlightanimationmovesCheckbox",                    
+                    display: "Highlight animation moves",                                        
                     settings: this.settings
                 }),
                 Combo({                    

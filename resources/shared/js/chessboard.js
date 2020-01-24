@@ -854,6 +854,21 @@ class GameNode_{
     constructor(){        
     }
 
+    stripCommentOfImages(){
+        this.comment = this.comment.replace(/#z[^#\s]*/g, "")
+    }
+
+    stripCommentOfDelays(){
+        this.comment = this.comment.replace(/#delay:[^#\s]*/g, "")
+    }
+
+    addImageToComment(name, setdelay){
+        if(setdelay) this.stripCommentOfDelays()
+        this.stripCommentOfImages()
+        this.comment += "#z@" + name
+        this.comment += "#delay:" + setdelay
+    }
+
     fromblob(parentgame, blob){
         this.parentgame = parentgame
         this.id = blob.id

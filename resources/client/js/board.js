@@ -27,12 +27,19 @@ class Board_ extends SmartDomElement{
         ]
     }
 
+    positionWheeled(ev){
+        if(ev.wheelDelta < 0) this.back()
+        if(ev.wheelDelta > 0) this.forward()
+    }
+
     init(){
         this.x()
 
         this.canvases = this.canvasnames.map(cn=>
             Canvas({width: this.boardsize(), height: this.boardsize()}).poa()
         )
+
+        this.ae("wheel", this.positionWheeled.bind(this))
 
         this.a(
             div().w(this.boardsize()).h(this.boardsize()).por().a(
@@ -60,7 +67,7 @@ class Board_ extends SmartDomElement{
 
         if(RICH) lms.forEach(lm => {
             lm.san = this.game.board.movetosan(lm)
-            lm.gameNode = this.game.getcurrentnode().sortedchilds().find(child=>child.gensan == lm.san)
+            lm.gameNode = this.getcurrentnode().sortedchilds().find(child=>child.gensan == lm.san)
             lm.gameMove = lm.gameNode ? 1 : 0
             lm.weights = lm.gameNode ? lm.gameNode.weights : [0, 0]
             lm.sortweight = lm.gameNode ? 100 + lm.gameNode.sortweight() : 0
@@ -249,7 +256,11 @@ class Board_ extends SmartDomElement{
     }
 
     analysiskey(){        
-        return `analysis/${this.game.variant}/${strippedfen(this.game.getcurrentnode().fen)}`
+        return `analysis/${this.game.variant}/${strippedfen(this.getcurrentnode().fen)}`
+    }
+
+    getcurrentnode(){
+        return this.game.getcurrentnode()
     }
 
     highlightrichanalysisinfo(richanalysisinfo){        
@@ -299,12 +310,12 @@ class Board_ extends SmartDomElement{
 
         this.commentcanvas.ctx.font = `${this.commentfontsize}px serif`
 
-        let message = this.game.getcurrentnode().comment.split("#")[0]
+        let message = this.getcurrentnode().comment.split("#")[0]
         if(message) this.commentcanvas.renderText(message, bs - 2 * this.commentmargin, this.commentfontsize * 1.1, this.commentmargin, this.commentmargin)
     }
 
     highlightLastMove(){
-        let currentnode = this.game.getcurrentnode()
+        let currentnode = this.getcurrentnode()
         let highlightcanvas = this.getCanvasByName("highlight")
         highlightcanvas.clear()        
         if(currentnode.genalgeb){                        
@@ -377,7 +388,7 @@ class Board_ extends SmartDomElement{
     }
 
     highlightDrawings(){        
-        let drawings = this.game.getcurrentnode().drawings()        
+        let drawings = this.getcurrentnode().drawings()        
         let drawingscanvas = this.getCanvasByName("drawings")
         drawingscanvas.clear()
         let b = this.game.board
