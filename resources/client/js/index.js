@@ -5,7 +5,11 @@ const STOCKFISH_JS_PATH         = "resources/client/cdn/stockfish.wasm.js"
 const BACKUP_FETCH_URL          = "https://raw.githubusercontent.com/easychessanimations/easychess/master/backup/backup.txt"
 const IMAGE_STORE_PATH          = "/resources/client/img/imagestore"
 const LICHESS_LOGIN_URL         = "/auth/lichess"
-const LICHESS_ANALYSIS_URL      = "https://lichess.org/analysis"
+const LICHESS_BASE_URL          = "https://lichess.org"
+const LICHESS_ANALYSIS_URL      = LICHESS_BASE_URL + "/analysis"
+const LICHESS_GAMES_URL         = LICHESS_BASE_URL + "/api/games/user"
+const DEFAULT_USERNAME          = "lishadowapps"
+const MAX_GAMES                 = 100
 
 const POSITION_CHANGED_DELAY    = 500
 const ALERT_DELAY               = 3000
@@ -166,6 +170,57 @@ class App extends SmartDomElement{
         this.doLater("highlightDrawings", HIGHLIGHT_DRAWINGS_DELAY)
     }
 
+    gameClicked(game, ev){        
+        if(ev.button){
+            window.open(LICHESS_BASE_URL + "/" + game.id)
+        }
+        this.mergeMoveList(game.moves)
+    }
+
+    buildGames(){        
+        let i = 0
+        this.gamesDiv.x().a(div().w(2000).mar(5).a(
+            div().a(
+                Button("Reload", this.fetchGames.bind(this)),
+                div().fs(12).marl(20).dib().html(`load time ${Math.round(this.gamesLoadTime / 1000)} sec(s)`).show(this.gamesLoadTime)
+            ),
+            this.games.map(game =>
+                div().bc(i++ % 2 ? "#eef" : "#efe").c("#00f").pad(1).mar(2).html(game.summarypadded).cp().ae("mousedown", this.gameClicked.bind(this, game))
+            )
+        ))
+    }
+
+    USER(){
+        return PROPS.USER || {}
+    }
+
+    username(){
+        return this.USER().id || DEFAULT_USERNAME
+    }
+
+    fetchGames(){
+        this.games = []
+        this.gamesLoadTime = null
+        this.buildGames()
+        let headers = {
+            Accept: "application/x-ndjson"
+        }
+        let fetchStarted = performance.now()
+        if(this.USER().accessToken){
+            headers.Authorization = "Bearer " + this.USER().accessToken
+        }        
+        simpleFetch(`${LICHESS_GAMES_URL}/${this.username()}?max=${MAX_GAMES}`, {
+            asNdjson: true,
+            headers: headers
+        }, result => {
+            if(result.ok){        
+                this.gamesLoadTime = performance.now() - fetchStarted
+                this.games = result.content.map(game => LichessGame(game, this.username()))
+                this.buildGames()
+            }
+        })
+    }
+
     buildMoves(){
         let lms = this.board.getlms(RICH).sort((a,b) => a.san.localeCompare(b.san))                
         lms.sort((a,b) => (b.sortweight - a.sortweight))
@@ -205,13 +260,21 @@ class App extends SmartDomElement{
         this.commentTextArea.focus()
     }
 
-    pgnPasted(ev){
-        ev.preventDefault()
-        let content = ev.clipboardData.getData('Text')        
-        let moves = content.split(/ |\./).filter(item=>item.match(/^[a-zA-Z]/))        
+    mergeMoveList(moves){
         let game = Game().fromsans(moves)
         this.alert(this.board.game.merge(game))                
         this.board.positionchanged()
+    }
+
+    mergeMoveListStr(content){
+        let moves = content.split(/ |\./).filter(item=>item.match(/^[a-zA-Z]/))        
+        this.mergeMoveList(moves)
+    }
+
+    pgnPasted(ev){
+        ev.preventDefault()
+        let content = ev.clipboardData.getData('Text')        
+        this.mergeMoveListStr(content)
     }
 
     nodeClicked(node){
@@ -965,17 +1028,20 @@ class App extends SmartDomElement{
             ]
         }))
 
-        this.aboutDiv = div().mar(5).marl(20).a(div().html(md2html(PROPS.readme)))
+        this.aboutDiv = div().a(div(), div().marl(20).html(md2html(PROPS.readme)))
+
+        this.gamesDiv = div().fs(16).ffm()
 
         this.tabs = TabPane({id: "maintabpane"}).setTabs([
             Tab({id: "moves", caption: "Moves", content: this.movesDiv}),
+            Tab({id: "games", caption: "Games", content: this.gamesDiv}),
             Tab({id: "tree", caption: "Tree", content: this.treeDiv}),
             Tab({id: "images", caption: "Images", content: this.imageDiv}),
             Tab({id: "anims", caption: "Animations", content: this.animsDiv}),
             Tab({id: "backup", caption: "Backup", content: this.backupDiv}),            
             Tab({id: "settings", caption: "Settings", content: this.settingsDiv}),
             Tab({id: "about", caption: "About", content: this.aboutDiv}),
-            Tab({id: "auth", caption: username, content: this.authDiv}),
+            Tab({id: "auth", caption: username, content: this.authDiv}),            
         ])
 
         this.mainPane.headDiv.jc("flex-start").a(div().dfcc().a(
@@ -1019,6 +1085,8 @@ class App extends SmartDomElement{
         this.showImages()
 
         this.loadImagestore()
+
+        this.fetchGames()
     }
 
     initgif(){

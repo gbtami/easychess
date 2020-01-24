@@ -42,11 +42,26 @@ function cloneObject(obj){
 function simpleFetch(url, params, callback){
     fetch(url, params).then(
         response => response.text().then(
-            text => {                
-                callback({ok: true, content: text})
+            text => {                 
+                if(params.asJson || params.asNdjson){
+                    try{
+                        let obj
+                        if(params.asNdjson){                            
+                            obj = text.split("\n").filter(line => line.length).map(line => JSON.parse(line))
+                        }else{
+                            obj = JSON.parse(text)
+                        }                                                
+                        callback({ok: true, content: obj})
+                    }catch(err){
+                        console.log("fetch parse json error", err)
+                        callback({ok: false, status: "Error: could not parse json."})
+                    }
+                }else{
+                    callback({ok: true, content: text})
+                }                
             },
             err => {
-                console.log("get response text error", err)
+                console.log("fetch get response text error", err)                
                 callback({ok: false, status: "Error: failed to get response text."})
             }
         ),

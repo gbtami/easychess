@@ -7,14 +7,23 @@ const fs = require('fs')
 const { getFiles } = require('../utils/fileutils')
 const { YEAR } = require('../shared/js/commonutils')
 
+var admin = null
+var firebase = null
+var bucket = null
+var db = null
+var firestore = null
+
 passport.use(new Strategy({
         clientID: process.env.LICHESS_CLIENT_ID,
         clientSecret: process.env.LICHESS_CLIENT_SECRET,
-        callbackURL: 'https://easychess.herokuapp.com/auth/lichess/callback'
+        callbackURL: IS_DEV() ? 'http://localhost:3000/auth/lichess/callback' : 'https://easychess.herokuapp.com/auth/lichess/callback'
     },
     function(accessToken, refreshToken, profile, cb) {
-    return cb(null, profile)
-}))
+        clog(`id : ${profile.id}\naccessToken : ${accessToken}\nrefreshToken : ${refreshToken}`)
+        profile.accessToken = accessToken
+        return cb(null, profile)
+    }
+))
 
 passport.serializeUser(function(user, cb) {
     cb(null, user)
@@ -54,12 +63,6 @@ function clog(msg){
 }
 
 const __rootdirname = path.join(__dirname, '../..')
-
-var admin = null
-var firebase = null
-var bucket = null
-var db = null
-var firestore = null
 
 if(process.env.SKIP_FIREBASE){
     console.log("skip firebase")

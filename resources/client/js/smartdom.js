@@ -1445,7 +1445,7 @@ class SplitPane_ extends SmartDomElement{
         this.headsize = this.props.headsize || 36
 
         this.headDiv = div().dfca().bc(this.props.fitViewPort ? "#fff" : "#ddd")        
-        this.bodyDiv = div().por().bc(this.props.fitViewPort ? "#fff" : "#ffe")
+        this.bodyDiv = div().bc(this.props.fitViewPort ? "#fff" : "#ffe")
 
         this.dfc()
 
@@ -1478,12 +1478,16 @@ class SplitPane_ extends SmartDomElement{
         if(this.props.row){
             this.bodysize = this.width - this.headsize
             this.headDiv.w(this.headsize).h(this.height)
-            this.bodyDiv.w(this.bodysize).h(this.height)
+            this.bodyWidth = this.bodysize
+            this.bodyHeight = this.height            
         }else{
             this.bodysize = this.height - this.headsize
             this.headDiv.w(this.width).h(this.headsize)
-            this.bodyDiv.w(this.width).h(this.bodysize)
+            this.bodyWidth = this.width
+            this.bodyHeight = this.bodysize
         }
+
+        this.bodyDiv.ww(this.bodyWidth).hh(this.bodyHeight)
 
         if(this.content) this.resizeContent()
 
@@ -1494,8 +1498,7 @@ class SplitPane_ extends SmartDomElement{
 
     resizeContent(){
         try{
-            if(this.props.row) this.content.resize(this.bodysize, this.height)
-            else this.content.resize(this.width, this.bodysize)
+            this.content.resize(this.bodyWidth, this.bodyHeight)
         }catch(err){}        
     }
 
@@ -1553,12 +1556,15 @@ class TabPane_ extends SplitPane_{
     }
 
     build(skipBody){
-        this.headDiv.x().a(this.tabs.map(tab => tab.selected(tab == this.selected)))
-        if(!skipBody) this.bodyDiv.x().a(this.tabs.map(tab => tab.content.poa().show(tab == this.selected)))        
-        if(this.selected){
-            let f = this.selected.content.resize
-            try{                
-                this.row ? f(this.bodysize, this.height) : f(this.width, this.bodysize)
+        this.headDiv.x().a(this.tabs.map(tab => tab.selected(tab == this.selected)))                
+        this.bodyDiv.ovf("initial")        
+        if(!skipBody) this.bodyDiv.x().a(this.tabs.map(tab => {                        
+            return tab.content.show(tab == this.selected)
+        }))        
+        if(this.selected){            
+            if(!(this.selected.content instanceof TabPane_)) this.bodyDiv.ovf("scroll")
+            try{                                
+                this.selected.content.resize(this.bodyWidth, this.bodyHeight)                
             }catch(err){}            
         }
         return this
