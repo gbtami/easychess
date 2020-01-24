@@ -272,7 +272,7 @@ class Board_ extends SmartDomElement{
                 div()
                     .mar(1).pad(1).w(80)
                     .html(item.san).fs(26).fwb().cp()
-                    .ae("mousedown", this.idParent().moveClicked.bind(this.idParent(), item.move)),
+                    .ae("mousedown", this.idParent().moveClicked.bind(this.idParent(), item.detailedmove)),
                 div()
                     .mar(1).pad(1).w(100)
                     .html(`${item.scorenumerical}`).fs(22).fwb(),
