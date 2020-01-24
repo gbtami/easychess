@@ -274,11 +274,13 @@ class Board_ extends SmartDomElement{
                     .html(item.san).fs(26).fwb().cp()
                     .ae("mousedown", this.idParent().moveClicked.bind(this.idParent(), item.detailedmove)),
                 div()
-                    .mar(1).pad(1).w(100)
-                    .html(`${item.scorenumerical}`).fs(22).fwb(),
+                    .mar(1).pad(1).w(100).cp()
+                    .html(`${item.scorenumerical}`).fs(22).fwb()
+                    .ae("mousedown", this.idParent().addLegalMove.bind(this.idParent(), item.detailedmove, 0)),
                 div()
-                    .c("#00a").fwb()
+                    .c("#00a").fwb().cp()
                     .html(`${lastcompleteddepth}`)
+                    .ae("mousedown", this.idParent().addLegalMove.bind(this.idParent(), item.detailedmove, 1)),
             )
     }
 
