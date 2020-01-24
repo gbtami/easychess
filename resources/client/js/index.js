@@ -20,7 +20,7 @@ const PLAY_ANIMATION_DELAY      = 1000
 
 const QUERY_INTERVAL            = PROPS.QUERY_INTERVAL || 3000
 
-const GAMETEXT_HEIGHT           = 120
+const GAMETEXT_HEIGHT           = 123
 const THUMB_SIZE                = 150
 
 const GREEN_BUTTON_COLOR        = "#afa"
@@ -280,7 +280,9 @@ class App extends SmartDomElement{
                 })
                     .fs(16).w(300),            
             ),
-            this.pgnText = TextAreaInput().mart(4).w(838).h(GAMETEXT_HEIGHT).ae("paste", this.pgnPasted.bind(this))
+            this.pgnText = TextAreaInput()
+                .mart(4).w(838).h(GAMETEXT_HEIGHT)
+                .ae("paste", this.pgnPasted.bind(this))
             )
 
         this.pgnText.setValue(this.board.game.pgn())
@@ -1121,7 +1123,7 @@ class App extends SmartDomElement{
             ),
             this.gametext = TextAreaInput()
                 .w(this.board.boardsize() - 12)
-                .h(GAMETEXT_HEIGHT)
+                .h(GAMETEXT_HEIGHT + scrollBarSize())
         ))
 
         this.mainPane.setContent(this.tabs)

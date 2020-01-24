@@ -305,3 +305,7 @@ function movecolor(weights){
     }
     return `rgb(${weights[1] ? 255 - weights[1]/10*255 : 0},${(160+weights[0]/10*95)*(weights[1] > 0 ? 0.7 : 1)},0)`
 }
+
+function scrollBarSize(){
+    return 19
+}
