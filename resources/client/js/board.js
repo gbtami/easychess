@@ -327,8 +327,9 @@ class Board_ extends SmartDomElement{
             .bc(richanalysisinfo.isLive ? "#afa" : "#eee")
             .a(                
                 this.createAnalysisInfoSummary(richanalysisinfo),
-                Button("Delete", this.idParent().deleteAnalysis.bind(this.idParent()))
-                    .mart(20).marl(180).bc(RED_BUTTON_COLOR),
+                richanalysisinfo.isLive ? div() :
+                    Button("Delete", this.idParent().deleteAnalysis.bind(this.idParent()))
+                        .mart(20).marl(180).bc(RED_BUTTON_COLOR),
             )
         }
     }
