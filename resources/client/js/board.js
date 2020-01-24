@@ -262,6 +262,52 @@ class Board_ extends SmartDomElement{
     getcurrentnode(){
         return this.game.getcurrentnode()
     }
+    
+
+    createAnalysisInfoItemMove(item, lastcompleteddepth){
+        return div()
+            .mar(1).pad(1).dfc()
+            .c(scoretorgb(item.scorenumerical))
+            .a(
+                div()
+                    .mar(1).pad(1).w(80)
+                    .html(item.san).fs(26).fwb().cp()
+                    .ae("mousedown", this.idParent().moveClicked.bind(this.idParent(), item.move)),
+                div()
+                    .mar(1).pad(1).w(100)
+                    .html(`${item.scorenumerical}`).fs(22).fwb(),
+                div()
+                    .c("#00a").fwb()
+                    .html(`${lastcompleteddepth}`)
+            )
+    }
+
+    createAnalysisInfoItemLine(item){
+        return div()
+            .w(2000).dfc().flwn()
+            .marl(10).ffm().fs(14)
+            .a(
+                item.pvsans.slice(1).map(san =>
+                    div()
+                        .c("#33a").bc("#ddd")
+                        .marr(8).html(san)
+                )
+            )
+    }
+
+    createAnalysisInfoItem(item, lastcompleteddepth){
+        return div()
+            .marl(5)
+            .a(
+                this.createAnalysisInfoItemMove(item, lastcompleteddepth),
+                this.createAnalysisInfoItemLine(item),
+            )
+    }
+
+    createAnalysisInfoSummary(richanalysisinfo){
+        return richanalysisinfo.analysisinfo.summary.map(item =>
+            this.createAnalysisInfoItem(item, richanalysisinfo.analysisinfo.lastcompleteddepth))
+    }
 
     highlightrichanalysisinfo(richanalysisinfo){        
         let analysisinfo = richanalysisinfo.analysisinfo
@@ -277,21 +323,13 @@ class Board_ extends SmartDomElement{
         }
 
         if(this.analysisinfoDiv){
-            this.analysisinfoDiv.bc(richanalysisinfo.isLive ? "#afa" : "#eee")
-                .a(analysisinfo.summary.map(item => div().marl(5).a(div()
-                    .mar(1).pad(1).dfc().c(scoretorgb(item.scorenumerical))
-                    .a(
-                        div()
-                            .mar(1).pad(1).w(80).html(item.san).fs(26).fwb().cp()
-                            .ae("mousedown", this.idParent().moveClicked.bind(this.idParent(), item.move)),
-                        div().mar(1).pad(1).w(100).html(`${item.scorenumerical}`).fs(22).fwb(),
-                        div().c("#00a").fwb().html(`${richanalysisinfo.analysisinfo.lastcompleteddepth}`)
-                    ),
-                    div().w(2000).dfc().flwn().marl(10).ffm().fs(14).a(
-                        item.pvsans.slice(1).map(san => div().c("#33a").bc("#ddd").marr(8).html(san))
-                    )
-                )
-            ))
+            this.analysisinfoDiv
+            .bc(richanalysisinfo.isLive ? "#afa" : "#eee")
+            .a(                
+                this.createAnalysisInfoSummary(richanalysisinfo),
+                Button("Delete", this.idParent().deleteAnalysis.bind(this.idParent()))
+                    .mart(20).marl(180).bc(RED_BUTTON_COLOR),
+            )
         }
     }
 

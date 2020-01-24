@@ -149,6 +149,12 @@ class App extends SmartDomElement{
         }        
     }
 
+    deleteAnalysis(){        
+        IDB.delete("engine", this.board.analysiskey()).then(result => {                        
+            this.board.positionchanged()
+        })
+    }
+
     moveClicked(lm, ev){
         this.board.makeMove(lm)
         if(ev.button) this.board.back()
