@@ -182,6 +182,7 @@ class App extends SmartDomElement{
             window.open(LICHESS_BASE_URL + "/" + game.id)
         }
         this.mergeMoveList(game.moves)
+        this.tabs.selectTab("moves")
     }
 
     buildGames(){        
@@ -244,7 +245,10 @@ class App extends SmartDomElement{
     }
 
     createNodeForLegalMove(lm){
-        return div().ffm().dfc().a(                                
+        let priority = lm.gameNode ? lm.gameNode.priority : 0
+        return div()            
+            .ac(priority ? "blink_me" : "dummy")
+            .ffm().dfc().a(                                
             div()
                 .cp().bc(lm.gameMove ? movecolor(lm.gameNode.weights) : "#eee")
                 .fw(lm.gameMove ? "bold" : "normal")

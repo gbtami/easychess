@@ -1580,6 +1580,10 @@ class TabPane_ extends SplitPane_{
         return this.build(SKIP_BODY)
     }
 
+    selectTab(key){
+        this.setSelected(this.findTabById(key))
+    }
+
     findTabById(id){
         return this.tabs.find(tab => tab.id == id)
     }
