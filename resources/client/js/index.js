@@ -963,8 +963,20 @@ class App extends SmartDomElement{
             div().mar(5).a(                
                 Button("Login with lichess", this.loginWithLichess.bind(this)),
                 Button("Set Password", this.setPassword.bind(this))                
-            )
+            )            
         )
+
+        if(PROPS.USER){
+            this.authDiv.a(
+                table().marl(5).sa("cellpadding", 10).sa("border", 1).a(
+                    Object.entries(PROPS.USER._json.perfs).map(perf => tr().a(
+                        td().html(perf[0]).c("#00f"),
+                        td().html(perf[1].games).c("#707").fwb(),
+                        td().html(perf[1].rating).c("#070").fwb(),
+                        td().html(perf[1].rd).c("#770").fwb()
+                )))
+            )
+        }
 
         this.imageDiv.resize = function(width, height){                        
             this.w(width - 20).mih(height - 20)

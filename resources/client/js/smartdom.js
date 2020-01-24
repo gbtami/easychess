@@ -1592,6 +1592,13 @@ class TabPane_ extends SplitPane_{
 }
 function TabPane(props){return new TabPane_(props)}
 
+class table_ extends SmartDomElement{
+    constructor(props){
+        super("table", props)
+    }
+}
+function table(props){return new table_(props)}
+
 class tr_ extends SmartDomElement{
     constructor(props){
         super("tr", props)
