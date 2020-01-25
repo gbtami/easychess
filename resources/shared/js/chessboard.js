@@ -1010,11 +1010,24 @@ class Game_{
         this.board = ChessBoard()
     }
 
+    get allNodes(){
+        return Object.entries(this.gamenodes).map(entry => entry[1])
+    }
+
+    get forAllNodes(){
+        return this.allNodes.forEach
+    }
+
+    removePriority(){
+        this.forAllNodes(node => node.priority = 0)
+    }
+
     fen(){
         return this.getcurrentnode().fen
     }
 
     merge(g){
+        this.removePriority()
         g.tobegin()
         this.tobegin()
         if(g.fen() != this.fen()) return "Merge failed, starting positions don't match."
@@ -1186,7 +1199,7 @@ class Game_{
     }
 
     pgn(docomments){
-        return `[Variant "${this.variant}"]
+        return `[Variant "${displayNameForVariantKey(this.variant)}"]
 [FEN "${this.getrootnode().fen}"]
 
 ${this.line(docomments)}`

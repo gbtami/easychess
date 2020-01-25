@@ -309,3 +309,7 @@ function movecolor(weights){
 function scrollBarSize(){
     return 19
 }
+
+function displayNameForVariantKey(variantKey){
+    return variantKey.substring(0,1).toUpperCase() + variantKey.substring(1)
+}

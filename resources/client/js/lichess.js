@@ -147,6 +147,15 @@ class LichessGame_{
         try{
         this.plies = obj.moves.split(" ").length
         }catch(err){console.log(err)}
+
+        if(this.ratingDiff){
+            this.effRatingDiff = this.ratingDiff
+            if(this.meBlack) this.effRatingDiff -= 200
+
+            this.surpriseDraw = false
+
+            if((this.effRatingDiff > 0) && (this.result == 0.5)) this.surpriseDraw = true
+        }
     }
 
     get summary(){
@@ -154,7 +163,7 @@ class LichessGame_{
     }
 
     get summarypadded(){        
-        return `${this.meLost ? "( * )" : "_____"} ${this.whiteTitledName.padEnd(20, "_")} ( ${this.whiteRating} ) - ${this.blackTitledName.padEnd(20, "_")} ( ${this.blackRating} ) [ ${this.perf.padEnd(12, "_")} ${this.clockStr.padEnd(10, "_")} ] ${this.resultStr.padEnd(16, "_")}`
+        return `${this.meLost ? "( * )" : this.surpriseDraw ? "( ? )" : "_____"} ${this.whiteTitledName.padEnd(20, "_")} ( ${this.whiteRating} ) - ${this.blackTitledName.padEnd(20, "_")} ( ${this.blackRating} ) ${this.resultStr.padEnd(9, "_")} [ ${this.clockStr.padEnd(10, "_")} ${this.perf.padEnd(12, "_")} ]`
     }
 }
 function LichessGame(obj, myUsername){return new LichessGame_(obj, myUsername)}

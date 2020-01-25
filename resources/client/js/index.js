@@ -9,7 +9,7 @@ const LICHESS_BASE_URL          = "https://lichess.org"
 const LICHESS_ANALYSIS_URL      = LICHESS_BASE_URL + "/analysis"
 const LICHESS_GAMES_URL         = LICHESS_BASE_URL + "/api/games/user"
 const DEFAULT_USERNAME          = "lishadowapps"
-const MAX_GAMES                 = 100
+const MAX_GAMES                 = IS_DEV() ? 10 : 100
 
 const POSITION_CHANGED_DELAY    = 500
 const ALERT_DELAY               = 3000
@@ -187,14 +187,18 @@ class App extends SmartDomElement{
 
     buildGames(){        
         let i = 0
-        this.gamesDiv.x().a(div().w(2000).mar(5).a(
+        this.gamesDiv.x().a(div().miw(4000).mih(4000).pad(2).bc("#add").a(
             div().a(
                 Button("Reload", this.fetchGames.bind(this)),
                 div().fs(12).marl(20).dib().html(`load time ${Math.round(this.gamesLoadTime / 1000)} sec(s)`).show(this.gamesLoadTime)
             ),
-            this.games.map(game =>
-                div().bc(i++ % 2 ? "#eef" : "#efe").c("#00f").pad(1).mar(2).html(game.summarypadded).cp().ae("mousedown", this.gameClicked.bind(this, game))
-            )
+            this.games.map(game => div().mart(3).bc(i++ % 2 ? "#dfdff0" : "#e0efe0").c("#00f").a(
+                div()
+                    .pad(1)
+                    .html(game.summarypadded),
+                div().marl(60).fs(12).c("#000")
+                    .html(game.moves.join(" "))
+            ).cp().ae("mousedown", this.gameClicked.bind(this, game)))
         ))
     }
 
