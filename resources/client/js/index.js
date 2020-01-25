@@ -321,12 +321,9 @@ class App extends SmartDomElement{
         this.board.setfromnode(node)
     }
 
-    buildTree(nodeOpt, rgbopt, depth, maxdepth){
+    buildTree(node, rgbopt, depth, maxdepth){
         if(depth > maxdepth) return div().html("...")
-
-        let def = this.getcurrentnode()
-        for(let i = 0; i <  parseInt(this.settings.treeBackwardDepthCombo.selected); i++) if(def.getparent()) def = def.getparent()
-        let node = nodeOpt || def
+        
         let current = node.id == node.parentgame.currentnodeid
         let rgb = rgbopt || randrgb()        
         if(node.childids.length > 1) rgb = randrgb()
@@ -361,8 +358,16 @@ class App extends SmartDomElement{
     showTree(){
         seed = TREE_SEED
 
+        let maxdepth = parseInt(this.settings.treeBackwardDepthCombo.selected) + parseInt(this.settings.treeMaxDepthCombo.selected)        
+        let node = this.getcurrentnode()
+        for(let i = 0; i < parseInt(this.settings.treeBackwardDepthCombo.selected); i++){
+            if(node.getparent()){
+                node = node.getparent()                
+            }
+        }        
+        
         this.treeDiv.x().a(
-            this.buildTree(null, null, 0, this.getcurrentnode().depth + parseInt(this.settings.treeMaxDepthCombo.selected))
+            this.buildTree(node, null, 0, maxdepth)
         )
 
         this.treeDiv.resize()
