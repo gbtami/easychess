@@ -239,6 +239,7 @@ class App extends SmartDomElement{
     }
 
     addLegalMove(lm, i, ev){        
+        ev.preventDefault()
         this.board.makeMove(lm)
         if(i < 0) this.getcurrentnode().weights = [0, 0]
         else{
