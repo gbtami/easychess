@@ -331,9 +331,10 @@ class App extends SmartDomElement{
         let rgb = rgbopt || randrgb()        
         if(node.childids.length > 1) rgb = randrgb()
 
-        return div()
+        let nodeDiv = div()
             .dfcc().mar(rgb == rgbopt ? 0 : 3)
             .ac("unselectable").bc(rgb)
+            .miw(depth ? 0 : 20000)            
             .a(
                 div()
                     .w(60).cp().pad(2).bdr("solid", 3, current ? "#0f0" : "#ddd")
@@ -349,6 +350,12 @@ class App extends SmartDomElement{
                     )
             )
         )        
+
+        if(current){
+            this.currentNodeTreeDiv = nodeDiv
+        }
+
+        return nodeDiv
     }
 
     showTree(){
@@ -357,6 +364,8 @@ class App extends SmartDomElement{
         this.treeDiv.x().a(
             this.buildTree(null, null, 0, this.getcurrentnode().depth + parseInt(this.settings.treeMaxDepthCombo.selected))
         )
+
+        setTimeout(() => this.currentNodeTreeDiv.siv({block: "center", inline: "center"}), 0)
     }
 
     storeDefault(){        
