@@ -331,7 +331,7 @@ class App extends SmartDomElement{
         let nodeDiv = div()
             .dfcc().mar(rgb == rgbopt ? 0 : 3)
             .ac("unselectable").bc(rgb)
-            .miw(depth ? 0 : 20000)            
+            .miw(depth ? 0 : 20000)                                    
             .a(
                 div()
                     .w(60).cp().pad(2).bdr("solid", 3, current ? "#0f0" : "#ddd")
@@ -365,7 +365,7 @@ class App extends SmartDomElement{
                 node = node.getparent()                
             }
         }        
-        
+
         this.treeDiv.x().a(
             this.buildTree(node, null, 0, maxdepth)
         )
@@ -1021,7 +1021,7 @@ class App extends SmartDomElement{
         this.treeDiv = div()
 
         this.treeDiv.resize = function(width, height){                        
-            if(this.currentNodeTreeDiv) setTimeout(() => this.currentNodeTreeDiv.siv({block: "center", inline: "center"}), 0)
+            if(this.currentNodeTreeDiv) setTimeout(() => this.currentNodeTreeDiv.siv({inline: "center"}), 0)
         }.bind(this)
 
         this.imageDiv = div()

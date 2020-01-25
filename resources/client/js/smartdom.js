@@ -184,6 +184,8 @@ class SmartDomElement{
     pad(x){return this.addStyle("padding", `${x}px`)}
     padl(x){return this.addStyle("paddingLeft", `${x}px`)}
     padr(x){return this.addStyle("paddingRight", `${x}px`)}
+    padt(x){return this.addStyle("paddingTop", `${x}px`)}
+    padb(x){return this.addStyle("paddingBottom", `${x}px`)}
     disp(x){return this.addStyle("display", x)}    
     df(x){return this.disp("flex")}        
     dib(x){return this.disp("inline-block")}    
