@@ -854,6 +854,16 @@ class GameNode_{
     constructor(){        
     }
 
+    get depth(){
+        let depth = 0
+        let current = this
+        while(current.parentid){            
+            current = current.getparent()
+            depth++
+        }
+        return depth
+    }
+
     stripCommentOfImages(){
         this.comment = this.comment.replace(/#z[^#\s]*/g, "")
     }
