@@ -365,7 +365,7 @@ class App extends SmartDomElement{
             this.buildTree(null, null, 0, this.getcurrentnode().depth + parseInt(this.settings.treeMaxDepthCombo.selected))
         )
 
-        setTimeout(() => this.currentNodeTreeDiv.siv({block: "center", inline: "center"}), 0)
+        this.treeDiv.resize()
     }
 
     storeDefault(){        
@@ -1014,6 +1014,10 @@ class App extends SmartDomElement{
         this.analysisinfoDiv = div().w(260).ovfs()
 
         this.treeDiv = div()
+
+        this.treeDiv.resize = function(width, height){                        
+            if(this.currentNodeTreeDiv) setTimeout(() => this.currentNodeTreeDiv.siv({block: "center", inline: "center"}), 0)
+        }.bind(this)
 
         this.imageDiv = div()
             .dfca().flww().ac("unselectable")
