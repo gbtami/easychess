@@ -31,7 +31,8 @@ const YELLOW_BUTTON_COLOR       = "#ffa"
 const IDLE_BUTTON_COLOR         = "#eee"
 
 const TREE_SEED                 = 10
-const TREE_BACKWARD_DEPTH       = 5
+
+const TREE_BACKWARD_DEPTH       = 10
 const TREE_MAX_DEPTH            = 10
 
 const DEFAULT_FRAME_DELAY       = 1000
@@ -1113,10 +1114,16 @@ class App extends SmartDomElement{
 
         this.gamesDiv = div().fs(16).ffm()
 
+        this.gamesTabPane = TabPane({id: "gamestabpane"}).setTabs([
+            Tab({id: "games", caption: "Fresh games", content: this.gamesDiv}),
+        ])
+
+        this.gamesTabPane.headDiv.bc("#eee")
+
         this.tabs = TabPane({id: "maintabpane"}).setTabs([
-            Tab({id: "moves", caption: "Moves", content: this.movesDiv}),
-            Tab({id: "games", caption: "Games", content: this.gamesDiv}),
+            Tab({id: "moves", caption: "Moves", content: this.movesDiv}),            
             Tab({id: "tree", caption: "Tree", content: this.treeDiv}),
+            Tab({id: "games", caption: "Games", content: this.gamesTabPane}),
             Tab({id: "images", caption: "Images", content: this.imageDiv}),
             Tab({id: "anims", caption: "Animations", content: this.animsDiv}),
             Tab({id: "backup", caption: "Backup", content: this.backupDiv}),            
